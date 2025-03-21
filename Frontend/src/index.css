@@ -1,0 +1,14 @@
+.nav-link{
+    margin-left: 2rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+
+#support-hero{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 12rem;
+}
