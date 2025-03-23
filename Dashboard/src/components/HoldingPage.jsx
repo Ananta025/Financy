@@ -1,10 +1,41 @@
-import React from 'react'
-import {holdings} from '../Data/Data'
+import React,{useState, useEffect} from 'react'
+// import {holdings} from '../Data/Data'
+import axios from 'axios'
+import { VerticalGraph } from './VerticalGraph'
+
 
 export default function HoldingPage() {
+
+  const [allHoldings, setAllHoldings] = useState([])
+
+  useEffect(() => {
+    axios.get("http://localhost:3000/allholdings").then((res) => {
+      setAllHoldings(res.data)
+    }).catch((err) => {
+      console.log(err)
+    })
+  }, [])
+
+  const labels = allHoldings.map((stock) => stock.name)
+
+  const data = {
+    labels,
+    datasets:[
+      {
+        label: "Stock price",
+        data: allHoldings.map((stock) => stock.price),
+        backgroundColor: "rgb(255, 99, 132)",
+      }
+    ]
+
+  }
+  console.log(data.datasets[0].data)
+
+
   return (
+    <>
     <div id="holding-page">
-      <h3 className='text-2xl font-medium pb-8'>Your holdings ({holdings.length})</h3>
+      <h3 className='text-2xl font-medium pb-8'>Your holdings ({allHoldings.length})</h3>
       <div className="holding-area">
         <div className="holdings">
           <table className=" border-collapse w-full">
@@ -21,7 +52,7 @@ export default function HoldingPage() {
               </tr>
             </thead>
             <tbody>
-              {holdings.map((stock, index) => {
+              {allHoldings.map((stock, index) => {
                 const currPrice = stock.price * stock.qty;
                 const isProfit = currPrice - stock.avg * stock.qty >= 0.0;
                 const profitClass = isProfit ? "text-green-600" : "text-red-600";
@@ -51,5 +82,7 @@ export default function HoldingPage() {
         </div>
       </div>
     </div>
+    <VerticalGraph data={data}  />
+    </>
   )
 }

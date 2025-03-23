@@ -5,9 +5,40 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
+import TradeModal from './TradeModel';
+import {DoughnoutChart} from './DoughnoutChart';
 
 
 export default function OrdersPage() {
+
+  const labels = watchlist.map((stock) => stock.name)
+
+  const data = {
+    labels,
+    datasets:[
+      {
+        label: "Stock price",
+        data: watchlist.map((stock) => stock.price),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)',
+          'rgba(255, 159, 64, 0.8)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+        ],
+      }
+    ]
+  }
+
   return (
     <div id="orders-page">
       <div className="order-site">
@@ -26,6 +57,7 @@ export default function OrdersPage() {
           })
         }
       </ul>
+      <DoughnoutChart data={data} />
     </div>
   )
 }
@@ -65,13 +97,28 @@ const WatchListIteam = ({stock}) => {
 
 
 const WatchListActions = ({uid}) => {
+  const [openTradeModal, setOpenTradeModal] = useState(false);
+  const [tradeType, setTradeType] = useState('');
+
+  const handleTradeModalOpen = (type) => {
+    setTradeType(type);
+    setOpenTradeModal(true);
+  };
+  const handleTradeModalClose = () => {
+    setOpenTradeModal(false);
+  };
   return(
+    <>
     <span className="watchlist-actions">
       <Tooltip title="Buy (B)" placement='top' arrow TransitionComponent={Grow}>
-        <button className='action buy-btn'> Buy</button>
+        <button
+        onClick={()=>handleTradeModalOpen('Buy')}
+        className='action buy-btn'> Buy</button>
       </Tooltip>
       <Tooltip title="Sell (S)" placement='top' arrow TransitionComponent={Grow}>
-        <button className='action sell-btn'> Sell</button>
+        <button
+        onClick={()=>handleTradeModalOpen('Sell')}
+        className='action sell-btn'> Sell</button>
       </Tooltip>
       <Tooltip title="Analytics (A)" placement='top' arrow TransitionComponent={Grow}>
         <button className="action chart-btn">
@@ -84,5 +131,12 @@ const WatchListActions = ({uid}) => {
         </button>
       </Tooltip>
     </span>
+    <TradeModal 
+    open={openTradeModal} 
+    handleClose={handleTradeModalClose} 
+    tradeType={tradeType} 
+    stockName={uid} 
+    />
+    </>
   )
 };
