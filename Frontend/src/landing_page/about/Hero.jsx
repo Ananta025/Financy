@@ -2,12 +2,12 @@ import React from 'react'
 
 export default function Hero() {
   return (
-    <div className='container p-5'>
-      <div className="row text-center mb-5">
-        <h2>We pioneered the discount broking model in India.</h2>
-        <h2>Now, we are breaking ground with our technology.</h2>
+    <div id='about-hero' className='container'>
+      <div id='about-hero-info' className="row text-center border-bottom ">
+        <h2 className='fs-3'>We pioneered the discount broking model in India.</h2>
+        <h2 className='fs-3'>Now, we are breaking ground with our technology.</h2>
       </div>
-      <div className="row ">
+      <div id='about-hero-para' className="row ">
         <div className="col p-5">
           <p>We kick-started operations on the 15th of August, 2010 with the goal of breaking all barriers that traders and investors face in India in terms of cost, support, and technology. We named the company Zerodha, a combination of Zero and "Rodha", the Sanskrit word for barrier.</p>
           <p>Today, our disruptive pricing models and in-house technology have made us the biggest stock broker in India.</p>
@@ -25,8 +25,8 @@ export default function Hero() {
           </p>
         </div>
       </div>
-      <div className='row mt-5'>
-        <h2 className='text-center mb-5'>Ananta</h2>
+      <div className='row mb-5 mt-3'>
+        <h2 className='text-center pb-5 mb-5'>Devloped By</h2>
         <div className="col text-center">
           <div className="rounded-circle overflow-hidden mx-auto" style={{width: "18rem", height: "18rem"}}>
             <img src="\media\images\ananta.jpg" alt="ananta" style={{width:"100%", height:"100%", objectFit: "cover"}}/>
@@ -34,7 +34,7 @@ export default function Hero() {
           <h3 className='mt-3'>Ananta</h3>
           <p>Founder and CEO</p>
         </div>
-        <div className="col">
+        <div id="developer-info" className="col ">
           <p>
           Ananta bootstrapped and founded Zerodha in 2010 to overcome the hurdles he faced during his decade long stint as a trader. Today, Zerodha has changed the landscape of the Indian broking industry. He is a member of the SEBI Secondary Market Advisory Committee (SMAC) and the Market Data Advisory Committee (MDAC).
           </p>

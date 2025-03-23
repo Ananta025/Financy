@@ -2,9 +2,9 @@ import React from 'react'
 
 export default function Brokerage() {
   return (
-    <div className='container'>
-        <div className="row">
-            <h4>Charges explained</h4>
+    <div id='brokerage' className='container'>
+        <div className="row gap-5">
+            <h4 className='pb-3'>Charges explained</h4>
             <div className="col text-muted">
                 <h6>Securities/Commodities transaction tax</h6>
                 <p>Tax by the government when transacting on the exchanges. Charged as above on both buy and sell sides when trading equity delivery. Charged only on selling side when trading intraday or on F&O.</p>
@@ -73,13 +73,13 @@ export default function Brokerage() {
             </div>
         </div>
         <div className="row">
-            <h6>Disclaimer</h6>
+            <h6 className='py-3'>Disclaimer</h6>
             <p>For Delivery based trades, a minimum of ₹0.01 will be charged per contract note. Clients who opt to receive physical contract notes will be charged ₹20 per contract note plus courier charges. Brokerage will not exceed the rates specified by SEBI and the exchanges. All statutory and regulatory charges will be levied at actuals. Brokerage is also charged on expired, exercised, and assigned options contracts. Free investments are available only for our retail individual clients. Companies, Partnerships, Trusts, and HUFs need to pay 0.1% or ₹20 (whichever is less) as delivery brokerage. A brokerage of 0.25% of the contract value will be charged for contracts where physical delivery happens. For netted off positions in physically settled contracts, a brokerage of 0.1% will be charged.</p>
         </div>
         <div className="row ">
-            <h4>Charges for account opening </h4>
-            <div className=' rounded-3 overflow-hidden border border-2 '>
-            <table className="table table-striped table-hover table-responsive">
+            <h4 className='py-4'>Charges for account opening </h4>
+            <div className=' rounded-3 overflow-hidden '>
+            <table className="table table-striped table-hover table-responsive border ">
                 <thead>
                     <tr>
                     <th scope="col"></th>

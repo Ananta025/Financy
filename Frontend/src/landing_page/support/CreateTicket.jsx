@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function CreateTicket() {
 return (
-    <div className='container p-5'>
+    <div id="create-ticket" className='container'>
             <div className='row mt-5 text-decoration-none'>
                     <h5 className='mb-5'>To create a ticket, select a relevant topic</h5>
                     <div className="col-4 ">

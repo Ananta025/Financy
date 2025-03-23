@@ -47,7 +47,7 @@ export default function ProductPage() {
         googlePlay=""
         appStore="" 
         />
-        <p>Want to know more about our technology stack? Check out the Zerodha.tech blog.</p>
+        <p className='text-center py-5 fs-5'>Want to know more about our technology stack? Check out the Zerodha.tech blog.</p>
         <Universe />
       
     </div>
