@@ -19,6 +19,7 @@ export default function Signup() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log(import.meta.env.VITE_BACKEND_URL);
     try{
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signin`,{
         email,
