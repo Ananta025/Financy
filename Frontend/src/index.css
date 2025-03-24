@@ -24,6 +24,27 @@
     color: rgb(8, 123, 238);
 }
 
+
+/* Auth section done */
+#auth-container{
+    padding: 5rem 8rem;
+    font-size: 1.25rem;
+}
+
+#promotion p{
+    font-size: 1.2rem;
+}
+
+
+#auth-form{
+    margin-left: 2rem;
+    margin-top: 1rem;
+}
+
+#form-tab{
+    margin-bottom: 4rem;
+}
+
 /* About section styles */
 
 #about-hero{

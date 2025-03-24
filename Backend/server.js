@@ -9,6 +9,11 @@ import Position from './models/positionModel.js';
 import Holding from './models/holdingModel.js';
 import Order from './models/orderModel.js';
 
+import userRoutes from './routes/userRoutes.js';
+
+
+
+
 
 
 
@@ -28,6 +33,7 @@ mongoose.connect(mongo_url).then(() => {
     console.log(error);
 });
 
+app.use('/users', userRoutes);
 
 
 app.get('/', (req, res) => {
