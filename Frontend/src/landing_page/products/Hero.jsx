@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Hero() {
   return (
-    <div id="product-hero" className="container py-5 border-bottom mb-5">
+    <div id="product-hero" className="container-fluid py-5 border-bottom mb-5">
       <div className="row">
         <div className="col-12 text-center">
           <h2 className="fs-2 mb-2">Financy Products</h2>

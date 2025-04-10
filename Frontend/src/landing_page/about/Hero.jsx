@@ -32,20 +32,20 @@ export default function Hero() {
             <img src="\media\images\ananta.jpg" alt="ananta" style={{width:"100%", height:"100%", objectFit: "cover"}}/>
           </div>
           <h3 className='mt-3'>Ananta</h3>
-          <p>Founder and CEO</p>
+          <p>Founder and Developer</p>
         </div>
         <div id="developer-info" className="col ">
           <p>
-          Ananta bootstrapped and founded Zerodha in 2010 to overcome the hurdles he faced during his decade long stint as a trader. Today, Zerodha has changed the landscape of the Indian broking industry. He is a member of the SEBI Secondary Market Advisory Committee (SMAC) and the Market Data Advisory Committee (MDAC).
+          Ananta is a passionate full-stack developer with a vision to simplify lives using smart technology. He is the creator of innovative platforms like SMART_FARMING, Commit Control blending clean design with powerful backend systems.
           </p>
           <p>
-          Ananta is also involved in the startup ecosystem in India and works with various incubators and accelerators to help startups scale. He is a TEDx speaker and has spoken at various industry forums across the country.
+          Currently pursuing BTech in Computer Science, Ananta has worked on diverse real-world projects in AI, trading, and communication tech. His skillset spans across the MERN stack, WebRTC, Docker, and more. He's also exploring the intersection of AI and web development, bringing intelligence to everyday apps.
           </p>
           <p>
-          Playing basketball is his zen. He is also a voracious reader and loves to travel.
+          Ananta is deeply rooted in the Indian developer ecosystem and aims to build scalable, impactful solutions for modern problems. 
           </p>
           <p>
-          Connect on Homepage / TradingQnA / Twitter / LinkedIn
+          Connect with Ananta: Homepage / GitHub / Twitter / LinkedIn
           </p>
         </div>
       </div>

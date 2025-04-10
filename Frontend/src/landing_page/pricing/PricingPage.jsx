@@ -9,7 +9,6 @@ export default function PricingPage() {
     <div>
         <Hero />
         <Brokerage />
-      
     </div>
   )
 }

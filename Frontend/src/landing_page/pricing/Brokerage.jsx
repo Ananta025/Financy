@@ -3,9 +3,9 @@ import React from 'react'
 export default function Brokerage() {
   return (
     <div id='brokerage' className='container'>
-        <div className="row gap-5">
+        <div className="row gap-md-5 mb-4">
             <h4 className='pb-3'>Charges explained</h4>
-            <div className="col text-muted">
+            <div className="col-12 col-lg-5 text-muted mb-4 mb-lg-0">
                 <h6>Securities/Commodities transaction tax</h6>
                 <p>Tax by the government when transacting on the exchanges. Charged as above on both buy and sell sides when trading equity delivery. Charged only on selling side when trading intraday or on F&O.</p>
                 <p>When trading at Zerodha, STT/CTT can be a lot more than the brokerage we charge. Important to keep a tab.</p>
@@ -40,7 +40,7 @@ export default function Brokerage() {
                     <li>MTF pledge charge: ₹30 + GST per pledge request per ISIN.</li>
                 </ul>                           
             </div>
-            <div className="col text-muted">
+            <div className="col-12 col-lg-5 text-muted">
                 <h6>GST</h6>
                 <p>Tax levied by the government on the services rendered. 18% of ( brokerage + SEBI charges + transaction charges)</p>
                 <h6>SEBI Charges</h6>
@@ -69,52 +69,48 @@ export default function Brokerage() {
                     <li>Delivery & MTF Brokerage: 0.5% per executed order.</li>
                     <li>Intraday Brokerage: 0.05% per executed order.</li>
                 </ul>
-
             </div>
+        </div>
+        <div className="row mb-4">
+            <h6 className='py-3'>Disclaimer</h6>
+            <p className="small-text-mobile">For Delivery based trades, a minimum of ₹0.01 will be charged per contract note. Clients who opt to receive physical contract notes will be charged ₹20 per contract note plus courier charges. Brokerage will not exceed the rates specified by SEBI and the exchanges. All statutory and regulatory charges will be levied at actuals. Brokerage is also charged on expired, exercised, and assigned options contracts. Free investments are available only for our retail individual clients. Companies, Partnerships, Trusts, and HUFs need to pay 0.1% or ₹20 (whichever is less) as delivery brokerage. A brokerage of 0.25% of the contract value will be charged for contracts where physical delivery happens. For netted off positions in physically settled contracts, a brokerage of 0.1% will be charged.</p>
         </div>
         <div className="row">
-            <h6 className='py-3'>Disclaimer</h6>
-            <p>For Delivery based trades, a minimum of ₹0.01 will be charged per contract note. Clients who opt to receive physical contract notes will be charged ₹20 per contract note plus courier charges. Brokerage will not exceed the rates specified by SEBI and the exchanges. All statutory and regulatory charges will be levied at actuals. Brokerage is also charged on expired, exercised, and assigned options contracts. Free investments are available only for our retail individual clients. Companies, Partnerships, Trusts, and HUFs need to pay 0.1% or ₹20 (whichever is less) as delivery brokerage. A brokerage of 0.25% of the contract value will be charged for contracts where physical delivery happens. For netted off positions in physically settled contracts, a brokerage of 0.1% will be charged.</p>
-        </div>
-        <div className="row ">
-            <h4 className='py-4'>Charges for account opening </h4>
-            <div className=' rounded-3 overflow-hidden '>
-            <table className="table table-striped table-hover table-responsive border ">
-                <thead>
-                    <tr>
-                    <th scope="col"></th>
-                    <th scope="col">Type of account</th>
-                    <th scope="col">Charges</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <th scope="row">1</th>
-                    <td>Online account</td>
-                    <td>Free</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">2</th>
-                    <td>Offline account</td>
-                    <td>Free</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">3</th>
-                    <td>NRI account (offline only)</td>
-                    <td>₹500</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">3</th>
-                    <td>Partnership, LLP, HUF, or Corporate accounts (offline only)</td>
-                    <td>₹500</td>
-                    </tr>
-                </tbody>
-            </table>
+            <h4 className='py-3 py-md-4'>Charges for account opening </h4>
+            <div className='rounded-3 overflow-hidden table-responsive'>
+                <table className="table table-striped table-hover border">
+                    <thead>
+                        <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Type of account</th>
+                        <th scope="col">Charges</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <th scope="row">1</th>
+                        <td>Online account</td>
+                        <td>Free</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">2</th>
+                        <td>Offline account</td>
+                        <td>Free</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">3</th>
+                        <td>NRI account (offline only)</td>
+                        <td>₹500</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">3</th>
+                        <td>Partnership, LLP, HUF, or Corporate accounts (offline only)</td>
+                        <td>₹500</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-
         </div>
-
-      
     </div>
   )
 }

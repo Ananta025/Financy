@@ -12,23 +12,22 @@ export default function LeftSection({
   return (
   <div id="left-section" className="container py-3">
     <div id="left-section-content" className="row">
-      <div className="col-7 p-3">
-        <img src={imageURL} alt=""/>
+      <div className="col-lg-7 col-md-12 p-3">
+        <img src={imageURL} alt="" className="img-fluid" />
       </div>
-      <div className="col-5">
+      <div className="col-lg-5 col-md-12 mt-3 mt-lg-0">
         <h2 className="fs-1 mb-3">{productName}</h2>
         <p className="fs-5">{productDescription}</p>
-        <div className="d-flex gap-5 fs-6" >
-        <a className="left-section-links"  href="{tryDemo}">Try demo <i className="fa-solid fa-arrow-right"></i></a>
-        <a className="left-section-links" href="{lernMore}">lern more <i className="fa-solid fa-arrow-right"></i></a>
+        <div className="d-flex flex-wrap gap-3 gap-md-5 fs-6 mb-3" >
+          <a className="left-section-links"  href={tryDemo}>Try demo <i className="fa-solid fa-arrow-right"></i></a>
+          <a className="left-section-links" href={lernMore}>Learn more <i className="fa-solid fa-arrow-right"></i></a>
         </div>
-        <div className="d-flex gap-3">
-        <a href="{googlePlay}"><img src="\media\images\googlePlayBadge.svg" alt="" /></a>
-        <a href="{appStore}"><img src="\media\images\appstoreBadge.svg" alt="" /></a>
+        <div className="d-flex flex-wrap gap-3">
+          <a href={googlePlay}><img src="\media\images\googlePlayBadge.svg" alt="Google Play" className="img-fluid" style={{maxHeight: "40px"}} /></a>
+          <a href={appStore}><img src="\media\images\appstoreBadge.svg" alt="App Store" className="img-fluid" style={{maxHeight: "40px"}} /></a>
         </div>
       </div>
     </div>
-
   </div>
 );
 }

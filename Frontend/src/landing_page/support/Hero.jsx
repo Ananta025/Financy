@@ -17,7 +17,7 @@ export default function Hero() {
         </div>
       </div>
       <div className="row">
-        <div className="col-6">
+        <div className="col-lg-6 col-md-12 mb-4">
           <p className="py-2 fs-5">
             Search for an answer or browse help topics to create a ticket
           </p>
@@ -27,30 +27,30 @@ export default function Hero() {
             placeholder="Eg: how do i activate F&O, why is my order getting rejected ..."
             style={{ outline: "none", border: "none", borderRadius: "0.25rem" }}
           />
-          <div className="d-flex justify-content-between px-5">
+          <div className="d-flex flex-wrap justify-content-between px-lg-5 px-md-3 px-0">
             <div id="support-links" className="py-3">
-              <a href="" className="text-white ">
+              <a href="" className="text-white">
                 Track account opening
               </a>
-              <a href="" className="text-white ">
+              <a href="" className="text-white">
                 Track segment activation
               </a>
             </div>
             <div id="support-links" className="py-3">
-              <a href="" className="text-white ">
+              <a href="" className="text-white">
                 Intraday margins{" "}
               </a>
-              <a href="" className="text-white ">
+              <a href="" className="text-white">
                 Kite user manual
               </a>
             </div>
           </div>
         </div>
-        <div className="col-6">
+        <div className="col-lg-6 col-md-12">
           <p className="fs-5 py-2">Featured</p>
           <ol>
             <li>
-              <a href="" className="py-2  text-white d-block">
+              <a href="" className="py-2 text-white d-block">
                 Rights Entitlements listing in March 2025
               </a>
             </li>

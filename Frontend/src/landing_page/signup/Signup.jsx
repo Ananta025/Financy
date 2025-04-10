@@ -1,16 +1,15 @@
-import React,{useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import OpenAccount from "../OpenAccount"
 import axios from 'axios'
 import httpStatus from "http-status"
 
-
-
 export default function Signup() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-
+  const [loginError, setLoginError] = useState("");
+  const [signupError, setSignupError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     localStorage.removeItem("token");
@@ -19,7 +18,8 @@ export default function Signup() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log(import.meta.env.VITE_BACKEND_URL);
+    setLoginError("");
+    setIsLoading(true);
     try{
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signin`,{
         email,
@@ -30,10 +30,12 @@ export default function Signup() {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("userId", response.data.userId);
         window.location.href = import.meta.env.VITE_DASHBOARD_URL;
-
       }
     }catch(err){
       console.error("Login error:", err.response?.data || err.message);
+      setLoginError(err.response?.data?.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
     setEmail("");
     setPassword("");
@@ -41,7 +43,8 @@ export default function Signup() {
   
   const handleSignup = async (e) => {
     e.preventDefault();
-    console.log(import.meta.env.VITE_BACKEND_URL);
+    setSignupError("");
+    setIsLoading(true);
     try{
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signup`,{
         name,
@@ -56,6 +59,9 @@ export default function Signup() {
       }
     }catch(err){
       console.error("Signup error:", err.response?.data || err.message);
+      setSignupError(err.response?.data?.message || "Signup failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
     setName("");
     setEmail("");
@@ -65,21 +71,21 @@ export default function Signup() {
   return (
     <div id="auth-container" className='container'>
       <div className="row text-center py-3">
-        <h2>Open a free demat and trading account online</h2>
+        <h2 className="fw-bold">Open a free demat and trading account online</h2>
         <p className='text-muted'>Start investing brokerage free and join a community of 1.5+ crore investors and traders</p>
       </div>
-      <div className="row">
-        <div className="col py-5 d-flex justify-content-center">
-          <img src="/media/images/signup.png" alt="" />
+      
+      <div className="row align-items-center">
+        <div className="col-lg-6 py-4 d-flex justify-content-center align-items-center">
+          <img src="/media/images/signup.png" alt="Signup illustration" className="img-fluid" style={{maxWidth: '90%', height: 'auto'}} />
         </div>
 
-
-        <div id="auth-form" className="col text-center py-5">
+        <div id="auth-form" className="col-lg-6 py-4">
           <div className="auth-form-container">
             <div id="form-tab" className="form-tabs">
               <ul className="nav nav-pills nav-fill" id="authTabs" role="tablist">
                 <li className="nav-item" role="presentation">
-                  <button  className="nav-link active w-50" id="login-tab" data-bs-toggle="pill" data-bs-target="#login-panel" type="button" role="tab">Login</button>
+                  <button className="nav-link active w-50" id="login-tab" data-bs-toggle="pill" data-bs-target="#login-panel" type="button" role="tab">Login</button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button className="nav-link w-50" id="signup-tab" data-bs-toggle="pill" data-bs-target="#signup-panel" type="button" role="tab">SignUp</button>
@@ -90,123 +96,156 @@ export default function Signup() {
             <div className="tab-content" id="authTabContent">
               {/* Login Form */}
               <div className="tab-pane fade show active" id="login-panel" role="tabpanel">
-                <form>
+                <form onSubmit={handleLogin}>
                   <div className="mb-4">
                     <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    type="email" className="form-control" placeholder="Email Address" required />
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      type="email" 
+                      className="form-control" 
+                      placeholder="Email Address" 
+                      required 
+                    />
                   </div>
                   <div className="mb-4">
                     <input
-                    value={password}
-                    onChange={(e)=> setPassword(e.target.value)}
-                    type="password" className="form-control" placeholder="Password" required />
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password" 
+                      className="form-control" 
+                      placeholder="Password" 
+                      required 
+                    />
                   </div>
+                  {loginError && <div className="alert alert-danger">{loginError}</div>}
                   <div className="mb-3 text-end">
                     <a href="#" className="text-decoration-none fs-6">Forgot Password?</a>
                   </div>
                   <button
-                  onClick={handleLogin}
-                  type="submit" className="btn btn-primary w-100">Login</button>
+                    type="submit" 
+                    className="btn btn-primary w-100"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Logging in...' : 'Login'}
+                  </button>
                 </form>
               </div>
               
               {/* Signup Form */}
               <div className="tab-pane fade" id="signup-panel" role="tabpanel">
-                <form>
+                <form onSubmit={handleSignup}>
                   <div className="mb-4">
                     <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    type="text" className="form-control" placeholder="Full Name" required />
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      type="text" 
+                      className="form-control" 
+                      placeholder="Full Name" 
+                      required 
+                    />
                   </div>
                   <div className="mb-4">
                     <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    type="email" className="form-control" placeholder="Email Address" required />
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      type="email" 
+                      className="form-control" 
+                      placeholder="Email Address" 
+                      required 
+                    />
                   </div>
                   <div className="mb-4">
                     <input
-                    value={password}
-                    onChange={(e)=> setPassword(e.target.value)}
-                    type="password" className="form-control" placeholder="Create Password" required />
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password" 
+                      className="form-control" 
+                      placeholder="Create Password" 
+                      required 
+                    />
                   </div>
-                  <div className="mb-3 form-check d-flex justify-content-start gap-3"> 
-                    <input type="checkbox" className="form-check-input" id="termsCheck" required />
+                  {signupError && <div className="alert alert-danger">{signupError}</div>}
+                  <div className="mb-3 form-check d-flex flex-wrap align-items-center">
+                    <input type="checkbox" className="form-check-input me-2" id="termsCheck" required />
                     <label className="form-check-label fs-6" htmlFor="termsCheck">I agree to the Terms & Conditions</label>
                   </div>
                   <button
-                  onClick={handleSignup}
-                  type="submit" className="btn btn-primary w-100">Create Account</button>
+                    type="submit" 
+                    className="btn btn-primary w-100"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Creating Account...' : 'Create Account'}
+                  </button>
                 </form>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="row text-center py-5">
-        <h2>Investment options with Financy demat account</h2>
+
+      <div className="row text-center py-4 mt-2">
+        <h2 className="fw-bold">Investment options with Financy demat account</h2>
       </div>
-      <div id="promotion" className="row py-5 text-center">
-        <div className="col-md-6 d-flex justify-content-center align-items-center gap-5 mb-2">
-          <img src="\media\images\stocks-acop.svg" alt="" />
-          <div className="text-start col-7">
+      
+      <div id="promotion" className="row py-4">
+        <div className="col-md-6 d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 mb-4">
+          <img src="\media\images\stocks-acop.svg" alt="Stocks" className="mb-3 mb-sm-0" />
+          <div className="text-center text-sm-start col-12 col-sm-7">
             <h4>Stocks</h4>
             <p className='text-muted'>Invest in the top 500 stocks in India</p>
           </div>
         </div>
-        <div className="col-md-6 d-flex justify-content-center align-items-center gap-5 mb-2">
-          <img src="\media\images\mf-acop.svg" alt="" />
-          <div className="text-start col-7">
+        <div className="col-md-6 d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 mb-4">
+          <img src="\media\images\mf-acop.svg" alt="IPOs" className="mb-3 mb-sm-0" />
+          <div className="text-center text-sm-start col-12 col-sm-7">
             <h4>IPOs</h4>
             <p className='text-muted'>Apply to the latest IPOs instantly via UPI</p>
           </div>
         </div>
       </div>
-      <div id="promotion" className="row text-center">
-        <div className="col-md-6 d-flex justify-content-center align-items-center gap-5 mb-2">
-          <img src="\media\images\ipo-acop.svg" alt="" />
-          <div className="text-start col-7">
+      
+      <div id="promotion" className="row">
+        <div className="col-md-6 d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 mb-4">
+          <img src="\media\images\ipo-acop.svg" alt="Mutual Funds" className="mb-3 mb-sm-0" />
+          <div className="text-center text-sm-start col-12 col-sm-7">
             <h4>Mutual Funds</h4>
             <p className='text-muted'>Invest in commission-free direct mutual funds</p>
           </div>
         </div>
-        <div className="col-md-6 d-flex justify-content-center align-items-center gap-5 mb-2">
-          <img src="\media\images\fo-acop.svg" alt="" />
-          <div className="text-start col-7">
+        <div className="col-md-6 d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 mb-4">
+          <img src="\media\images\fo-acop.svg" alt="Future & Options" className="mb-3 mb-sm-0" />
+          <div className="text-center text-sm-start col-12 col-sm-7">
             <h4>Future & Options</h4>
             <p className='text-muted'>Hedge and mitigate market risk through simplified F&O trading</p>
           </div>
         </div>
       </div>
-      <div className="row d-flex justify-content-center my-5 py-2">
-        <button className='btn btn-primary w-25'>Explore Investment</button>
+      
+      <div className="row d-flex justify-content-center my-4 py-2">
+        <button className='btn btn-primary col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3'>Explore Investment</button>
       </div>
 
       <div className="row">
-        <div className="row text-center py-5">
-          <h2>Steps to open a demat account with Financy</h2>
+        <div className="row text-center py-4">
+          <h2 className="fw-bold">Steps to open a demat account with Financy</h2>
         </div>
         <div className="row">
-          <div className="col py-5 text-center">
-            <img src="\media\images\steps-acop.svg" alt="" />
+          <div className="col-md-6 py-4 text-center">
+            <img src="\media\images\steps-acop.svg" alt="Steps" className="img-fluid" />
           </div>
-          <div className="col py-5 d-flex justify-content-center">
-            <ol className='font-bold'>
-              <li className="pb-3 mb-3 border-bottom" style={{width: "300px"}}>Enter the requested details</li>
-              <li className="pb-3 mb-3 border-bottom" style={{width: "300px"}}>Complete e-sign & verification</li>
-              <li>Start investing!</li>
+          <div className="col-md-6 py-4 d-flex justify-content-center align-items-center">
+            <ol className='fw-bold'>
+              <li className="pb-3 mb-3 border-bottom" style={{maxWidth: "300px"}}>Enter the requested details</li>
+              <li className="pb-3 mb-3 border-bottom" style={{maxWidth: "300px"}}>Complete e-sign & verification</li>
+              <li style={{maxWidth: "300px"}}>Start investing!</li>
             </ol>
           </div>
         </div>
       </div>
 
-
       <div className="row">
-        <div className="row text-center py-5">
-          <h2>Frequently Asked Questions</h2>
+        <div className="row text-center py-4">
+          <h2 className="fw-bold">Frequently Asked Questions</h2>
         </div>
         <div className="accordion" id="faqAccordion">
           <div className="accordion-item">
@@ -260,9 +299,8 @@ export default function Signup() {
           <div className="accordion-item">
             <h2 className="accordion-header" id="headingFive">
               <button className="accordion-button collapsed fw-medium" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-              Can I trade in international stocks with Financy?
+                Can I trade in international stocks with Financy?
               </button>
-                
             </h2>
             <div id="collapseFive" className="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
               <div className="accordion-body fw-normal fs-6">
@@ -298,7 +336,6 @@ export default function Signup() {
       </div>
 
       <OpenAccount />
-
     </div>
   )
 }
