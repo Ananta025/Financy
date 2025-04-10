@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function Navbar() {
   return (
-    <nav id="nav-bar" className="navbar navbar-expand-lg bg-white border-bottom p-2.5 position-sticky top-0 ">
+    <nav id="nav-bar" className="navbar navbar-expand-lg bg-white border-bottom p-2.5 py-2.75 position-sticky top-0 ">
       <div className="container">
         <div
         onClick={() => window.location.href = "/"}
