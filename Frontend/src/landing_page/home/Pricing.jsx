@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Pricing() {
   return (
-    <div className='container p-5 mt-5' id="home-pricing-section">
+    <div className='container p-4 p-md-5 mt-4 mt-md-5' id="home-pricing-section">
       <div className="row">
         <div className="col-lg-5 col-md-12 mb-4">
           <h2>Unbeatable pricing</h2>
