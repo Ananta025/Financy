@@ -5,8 +5,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import TradeModal from './TradeModel';
-import {DoughnoutChart} from './DoughnoutChart';
+import TradeModal from '../components/TradeModel';
+import {DoughnoutChart} from '../components/DoughnoutChart';
 
 
 export default function OrdersPage() {
