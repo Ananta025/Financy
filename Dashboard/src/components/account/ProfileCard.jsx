@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 export default function ProfileCard() {
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState({
-    name: 'Ananta Dhungana',
-    email: 'ananta.dhungana@example.com',
+    name: 'Ananta Chandra Das',
+    email: 'ananta.dhun@example.com',
     mobile: '+91 9876543210',
   });
   
@@ -32,7 +32,7 @@ export default function ProfileCard() {
   };
   
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 overflow-hidden">
       <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex flex-col items-center">
@@ -53,7 +53,7 @@ export default function ProfileCard() {
           )}
         </div>
         
-        <div className="flex-1">
+        <div className="flex-1 overflow-hidden">
           {editing ? (
             <div className="space-y-4">
               <div>
@@ -64,7 +64,7 @@ export default function ProfileCard() {
                   id="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 overflow-ellipsis"
                 />
               </div>
               <div>
@@ -75,7 +75,7 @@ export default function ProfileCard() {
                   id="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 overflow-ellipsis"
                 />
               </div>
               <div>
@@ -86,7 +86,7 @@ export default function ProfileCard() {
                   id="mobile"
                   value={formData.mobile}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 overflow-ellipsis"
                 />
               </div>
               <div className="flex gap-3 justify-end pt-2">
@@ -123,15 +123,15 @@ export default function ProfileCard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">Full Name</p>
-                  <p>{profile.name}</p>
+                  <p className="break-words">{profile.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p>{profile.email}</p>
+                  <p className="break-words">{profile.email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Mobile Number</p>
-                  <p>{profile.mobile}</p>
+                  <p className="break-words">{profile.mobile}</p>
                 </div>
               </div>
             </div>

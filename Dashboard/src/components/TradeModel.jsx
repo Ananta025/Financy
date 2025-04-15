@@ -3,9 +3,9 @@ import { Modal, Box, Typography, TextField, Button, useMediaQuery, useTheme } fr
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 
-const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => {
-  const [quantity, setQuantity] = useState(1);
-  const [total, setTotal] = useState(stockPrice);
+const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, orderDetails }) => {
+  const [quantity, setQuantity] = useState(orderDetails ? orderDetails.quantity : 1);
+  const [total, setTotal] = useState(orderDetails ? orderDetails.total : stockPrice);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -16,12 +16,20 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
   };
   
   const handleSubmit = () => {
-    axios.post('http://localhost:3000/new-order', {
-        name : stockName,
-        qty: quantity,
-        price: stockPrice,
-        mode : tradeType,
-    })
+    // Prepare the order data
+    const orderData = {
+      name: stockName,
+      qty: quantity,
+      price: stockPrice,
+      mode: tradeType,
+      orderType: orderDetails ? orderDetails.orderType : 'market',
+      limitPrice: orderDetails?.limitPrice || stockPrice,
+      triggerPrice: orderDetails?.triggerPrice || null,
+      total: parseFloat(total)
+    };
+    
+    // Send the order to the server
+    axios.post('http://localhost:3000/new-order', orderData)
       .then((res) => {
         console.log(res.data);
         handleClose();
@@ -29,7 +37,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
       .catch((err) => {
         console.log(err);
       });
-    };
+  };
   
   return (
     <Modal
@@ -65,7 +73,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
             component="h2"
             sx={{ fontWeight: 'bold' }}
           >
-            {tradeType} {stockName}
+            Confirm {tradeType} Order
           </Typography>
           <CloseIcon 
             onClick={handleClose} 
@@ -81,16 +89,40 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
           />
         </div>
         
-        <div className="mb-4">
-          <Typography 
-            variant="subtitle1" 
-            sx={{ 
-              fontSize: { xs: '1rem', sm: '1.1rem' },
-              fontWeight: 500
-            }}
-          >
-            Current Price: ₹{stockPrice}
-          </Typography>
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+              {stockName}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+              ₹{stockPrice}
+            </Typography>
+          </div>
+          
+          {orderDetails && (
+            <div className="bg-gray-50 p-3 rounded-md mb-4">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-600">Order Type:</span>
+                  <p className="font-medium capitalize">{orderDetails.orderType}</p>
+                </div>
+                
+                {orderDetails.orderType !== 'market' && (
+                  <div>
+                    <span className="text-gray-600">Limit Price:</span>
+                    <p className="font-medium">₹{orderDetails.limitPrice.toFixed(2)}</p>
+                  </div>
+                )}
+                
+                {orderDetails.orderType === 'sl' && (
+                  <div>
+                    <span className="text-gray-600">Trigger Price:</span>
+                    <p className="font-medium">₹{orderDetails.triggerPrice.toFixed(2)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="mb-4">
@@ -105,6 +137,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
               style: { fontSize: isMobile ? '1rem' : '1.1rem' }
             }}
             sx={{ mt: 1, mb: 1 }}
+            disabled={!!orderDetails}
           />
         </div>
         
@@ -119,6 +152,15 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
           >
             Total Amount: ₹{total}
           </Typography>
+          
+          <div className="bg-gray-50 p-3 rounded-md text-sm">
+            <p className="text-gray-600 mb-1">
+              By placing this order, you agree to our Terms of Service and acknowledge that you have read our Privacy Policy.
+            </p>
+            <p className="text-gray-600">
+              All orders are subject to market conditions and availability.
+            </p>
+          </div>
         </div>
         
         <Button 
@@ -135,7 +177,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice }) => 
             mt: 1
           }}
         >
-          Confirm {tradeType}
+          Confirm {tradeType} Order
         </Button>
       </Box>
     </Modal>
