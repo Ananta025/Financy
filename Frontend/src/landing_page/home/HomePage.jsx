@@ -7,6 +7,7 @@ import OpenAccount from '../OpenAccount'
 import HeroSection from './HeroSection'
 import Pricing from './Pricing'
 import Stats from './Stats'
+import { ChatbotWidget } from '../common'
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
         <Pricing />
         <Stats />
         <OpenAccount />
+        <ChatbotWidget />
     </div>
   )
 }

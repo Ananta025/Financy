@@ -10,6 +10,8 @@ import RecentOrdersPreview from '../components/home/RecentOrdersPreview';
 import Watchlist from '../components/home/Watchlist';
 import QuickActions from '../components/home/QuickActions';
 import NewsFeed from '../components/home/NewsFeed';
+// Import ChatbotWidget
+import { ChatbotWidget } from '../components/common';
 
 export default function HomePage() {
   const [userData, setUserData] = useState({
@@ -110,6 +112,9 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      
+      {/* Add ChatbotWidget */}
+      <ChatbotWidget />
     </div>
   );
 }

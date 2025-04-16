@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^0.8.0",
     "axios": "^1.8.4",
+    "dompurify": "^3.2.5",
     "dotenv": "^16.4.7",
     "http-status": "^2.1.0",
     "react": "^19.0.0",

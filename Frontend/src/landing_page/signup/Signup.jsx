@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import OpenAccount from "../OpenAccount"
 import axios from 'axios'
 import httpStatus from "http-status"
+import { ChatbotWidget } from '../common'
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -336,6 +337,7 @@ export default function Signup() {
       </div>
 
       <OpenAccount />
+      <ChatbotWidget />
     </div>
   )
 }

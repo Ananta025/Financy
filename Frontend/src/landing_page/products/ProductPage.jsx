@@ -3,6 +3,7 @@ import Hero from './Hero'
 import Universe from './Universe'
 import LeftSection from './LeftSection'
 import RightSection from './RightSection'
+import { ChatbotWidget } from '../common'
 
 export default function ProductPage() {
   return (
@@ -49,7 +50,7 @@ export default function ProductPage() {
         />
         <p className='text-center py-5 fs-5'>Want to know more about our technology stack? Check out the Zerodha.tech blog.</p>
         <Universe />
-      
+        <ChatbotWidget />
     </div>
   )
 }
