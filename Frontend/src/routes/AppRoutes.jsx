@@ -8,7 +8,7 @@ import ProductPage from '../landing_page/products/ProductPage'
 import SupportPage from '../landing_page/support/SupportPage'
 import Navbar from '../landing_page/home/Navbar'
 import Footer from '../landing_page/Footer'
-import NotFound from '../landing_page/NotFound'
+import NotFoundPage  from '../landing_page/NotFoundPage'
 
 
 
@@ -24,7 +24,7 @@ export default function AppRoutes() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/products" element={<ProductPage />} />
             <Route path="/support" element={<SupportPage />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFoundPage />} />
             </Routes>
             <Footer />
         </Router>

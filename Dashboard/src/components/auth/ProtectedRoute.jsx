@@ -1,53 +1,15 @@
-import { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import authService from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Component that protects routes requiring authentication
  * Redirects to login if user is not authenticated
  */
 const ProtectedRoute = () => {
-  const [isChecking, setIsChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      // First check for token in URL params (for initial redirection)
-      const gotTokenFromParams = authService.initializeAuthFromParams();
-      
-      // Check if user is authenticated in localStorage
-      const isAuthed = authService.isAuthenticated();
-      
-      if (!isAuthed) {
-        // User is not authenticated, will redirect
-        setIsAuthenticated(false);
-        setIsChecking(false);
-        return;
-      }
-      
-      // Verify token with backend for extra security
-      // Only if the token wasn't just received from params
-      if (!gotTokenFromParams) {
-        try {
-          const isValid = await authService.validateToken();
-          setIsAuthenticated(isValid);
-        } catch (error) {
-          console.error("Token validation error:", error);
-          setIsAuthenticated(false);
-        }
-      } else {
-        // We just got the token from params, assume it's valid
-        setIsAuthenticated(true);
-      }
-      
-      setIsChecking(false);
-    };
-
-    checkAuth();
-  }, []);
+  const { isAuthenticated, isLoading } = useAuth();
 
   // Show loading while checking authentication
-  if (isChecking) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
@@ -60,7 +22,7 @@ const ProtectedRoute = () => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to={import.meta.env.VITE_FRONTEND_URL + '/login'} replace />;
+    return <Navigate to="/signup" replace />;
   }
 
   // Render children routes if authenticated

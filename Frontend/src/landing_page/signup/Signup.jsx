@@ -28,9 +28,11 @@ export default function Signup() {
       })
       if(response.status === httpStatus.OK){
         console.log("User logged in successfully");
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userId", response.data.userId);
-        window.location.href = import.meta.env.VITE_DASHBOARD_URL;
+        // Instead of storing token in localStorage and redirecting
+        // Redirect with token as URL parameters
+        const token = response.data.token;
+        const userId = response.data.userId;
+        window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
       }
     }catch(err){
       console.error("Login error:", err.response?.data || err.message);
@@ -54,9 +56,10 @@ export default function Signup() {
       })
       if(response.status === httpStatus.CREATED){
         console.log("User created successfully");
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userId", response.data.userId);
-        window.location.href = import.meta.env.VITE_DASHBOARD_URL;
+        // Redirect with token as URL parameters
+        const token = response.data.token;
+        const userId = response.data.userId;
+        window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
       }
     }catch(err){
       console.error("Signup error:", err.response?.data || err.message);
