@@ -86,7 +86,7 @@ export default function Navbar() {
                 
                 {/* Right Icons */}
                 <div className="flex justify-between items-center gap-3">
-                    <div className="hidden sm:flex gap-3">
+                    <div className="flex gap-2">
                         <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
                             <img className='w-5' src="/images/Frame.svg" alt="Notification" />
                         </button>
@@ -100,7 +100,7 @@ export default function Navbar() {
                     
                     {/* Hamburger Menu Button */}
                     <button 
-                        className="md:hidden ml-2 p-2 rounded-full focus:outline-none hover:bg-gray-100 transition-all duration-200" 
+                        className="md:hidden p-2 rounded-full focus:outline-none hover:bg-gray-100 transition-all duration-200" 
                         onClick={toggleMenu}
                         aria-label="Toggle menu"
                     >
@@ -157,14 +157,6 @@ export default function Navbar() {
                     >
                         Accounts
                     </Link>
-                    <div className="flex gap-4 py-3 px-3 sm:hidden">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
-                            <img className='w-5' src="/images/Frame.svg" alt="Notification" />
-                        </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
-                            <img className='w-5' src="/images/Frame (1).svg" alt="Settings" />
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

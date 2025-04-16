@@ -55,7 +55,7 @@ export default function PositionPage() {
   };
 
   return (
-    <div className="container mx-auto px-10 py-6 sm:px-14 md:px-20 lg:px-28 xl:px-32">
+    <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
       {/* Summary Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">

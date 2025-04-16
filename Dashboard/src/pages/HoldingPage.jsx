@@ -284,7 +284,7 @@ export default function HoldingPage() {
   };
 
   return (
-    <div className="container mx-auto px-8 py-6 sm:px-12 md:px-16 lg:px-22 xl:px-26">
+    <div className="container mx-auto px-4 py-6 sm:px-6 md:px-8 lg:px-22 xl:px-26">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Your Holdings</h1>
         <div className="text-sm text-gray-500">

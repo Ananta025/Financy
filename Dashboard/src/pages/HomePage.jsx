@@ -45,7 +45,7 @@ export default function HomePage() {
     <div className="bg-gray-50 min-h-screen pb-10">
       {/* Header with greeting and user info */}
       <div className="bg-white mx-2 my-2">
-        <div className="container mx-auto px-8 py-4 sm:px-12 md:px-16 lg:px-22 xl:px-26">
+        <div className="container mx-auto px-4 py-4 sm:px-6 md:px-8 lg:px-22 xl:px-26">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">Hello, {userData.name}!</h1>
@@ -74,7 +74,7 @@ export default function HomePage() {
       </div>
 
       {/* Main content */}
-      <div className="container mx-auto px-8 py-6 sm:px-12 md:px-16 lg:px-22 xl:px-26">
+      <div className="container mx-auto px-4 py-6 sm:px-6 md:px-8 lg:px-22 xl:px-26">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left column */}
           <div className="lg:col-span-2 space-y-6">
