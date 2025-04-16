@@ -1,12 +1,12 @@
 import React from 'react'
 import {BrowserRouter as Router, Routes, Route, Outlet} from 'react-router-dom'
-import HomePage from '../components/HomePage'
-import OrdersPage from '../components/OrdersPage'
+import HomePage from '../pages/HomePage'
+import OrdersPage from '../pages/OrdersPage'
 import Navbar from '../components/Navbar'
-import HoldingPage from '../components/HoldingPage'
-import PositionPage from '../components/PositionPage'
-import AccountPage from '../components/AccountPage'
-import NotFoundPage from '../components/NotFoundPage'
+import HoldingPage from '../pages/HoldingPage'
+import PositionPage from '../pages/PositionPage'
+import AccountPage from '../pages/AccountPage'
+import NotFoundPage from '../pages/NotFoundPage'
 
 const NavbarLayout = () => (
   <>

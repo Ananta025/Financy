@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-console.log("API_KEY", API_KEY);
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 const chatbotService = {
