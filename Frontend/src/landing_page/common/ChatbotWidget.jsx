@@ -5,9 +5,7 @@ import DOMPurify from 'dompurify';
 
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! How can I help you today?", sender: 'bot' }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,6 +24,17 @@ const ChatbotWidget = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Add welcome message when chat opens
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setTimeout(() => {
+        setMessages([
+          { id: 1, text: "Hello! How can I help you today?", sender: 'bot', isNew: true }
+        ]);
+      }, 600); // Small delay for better visual effect after the chat window opens
+    }
+  }, [isOpen, messages.length]);
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -71,7 +80,8 @@ const ChatbotWidget = () => {
     const userMessage = {
       id: messages.length + 1,
       text: sanitizeMessage(inputMessage),
-      sender: 'user'
+      sender: 'user',
+      isNew: true
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -87,7 +97,8 @@ const ChatbotWidget = () => {
       const botMessage = {
         id: messages.length + 2,
         text: sanitizeMessage(response.message || "I'm having trouble understanding. Can you rephrase that?"),
-        sender: 'bot'
+        sender: 'bot',
+        isNew: true
       };
       
       setMessages(prev => [...prev, botMessage]);
@@ -100,7 +111,8 @@ const ChatbotWidget = () => {
         id: messages.length + 2,
         text: 'Sorry, I encountered an error. Please try again later.',
         sender: 'bot',
-        error: true
+        error: true,
+        isNew: true
       };
       
       setMessages(prev => [...prev, errorMessage]);
@@ -177,7 +189,7 @@ const ChatbotWidget = () => {
             {messages.map(message => (
               <div 
                 key={message.id} 
-                className={`chatbot-message ${message.sender === 'user' ? 'chatbot-message-user' : 'chatbot-message-bot'} ${message.error ? 'chatbot-message-error' : ''}`}
+                className={`chatbot-message ${message.sender === 'user' ? 'chatbot-message-user' : 'chatbot-message-bot'} ${message.error ? 'chatbot-message-error' : ''} ${message.isNew ? 'chatbot-message-new' : ''}`}
               >
                 <div className="chatbot-message-bubble">
                   {message.text}
