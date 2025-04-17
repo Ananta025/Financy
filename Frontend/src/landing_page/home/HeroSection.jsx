@@ -1,6 +1,13 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
+  const handleSignUp = () => {
+    navigate('/signup');
+  };
+
   return (
     <div className='container p-4 p-md-5' id="hero-section">
       <div className='row text-center'>
@@ -8,7 +15,9 @@ export default function HeroSection() {
         <h1 className='mt-4 mt-md-5'>Invest in everything</h1>
         <p>Online platform to invest in stocks, derivatives, mutual funds, ETFs, bonds, and more.</p>
         <div>
-          <button className='p-2 btn btn-primary signup-btn'>Sign up for free</button>
+          <button
+          onClick={handleSignUp}
+          className='p-2 btn btn-primary signup-btn'>Sign up for free</button>
         </div>
       </div>      
     </div>

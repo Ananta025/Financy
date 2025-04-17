@@ -5,11 +5,14 @@ import httpStatus from "http-status"
 import { ChatbotWidget } from '../common'
 
 export default function Signup() {
+  // State for form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [signupError, setSignupError] = useState("");
+  
+  // Replace simple error strings with error objects to track field-specific errors
+  const [loginErrors, setLoginErrors] = useState({});
+  const [signupErrors, setSignupErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -19,9 +22,9 @@ export default function Signup() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoginError("");
+    setLoginErrors({}); // Clear previous errors
     setIsLoading(true);
-    try{
+    try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signin`,{
         email,
         password
@@ -48,19 +51,38 @@ export default function Signup() {
       }
     } catch(err) {
       console.error("Login error:", err.response?.data || err.message);
-      setLoginError(err.response?.data?.message || "Login failed. Please try again.");
+      
+      // Clear form fields on unsuccessful login
+      setEmail("");
+      setPassword("");
+      
+      // Check specifically for invalid credentials error
+      if (err.response?.status === 401 || 
+          err.response?.data?.message?.toLowerCase().includes('invalid credentials') ||
+          err.response?.data?.message?.toLowerCase().includes('incorrect password')) {
+        setLoginErrors({ general: "Invalid email or password. Please try again." });
+      }
+      // Updated: Use error.path instead of error.param to match backend response
+      else if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        const fieldErrors = {};
+        err.response.data.errors.forEach(error => {
+          fieldErrors[error.path] = error.msg; // Changed from error.param to error.path
+        });
+        setLoginErrors(fieldErrors);
+      } else {
+        // General error
+        setLoginErrors({ general: err.response?.data?.message || "Login failed. Please try again." });
+      }
     } finally {
       setIsLoading(false);
     }
-    setEmail("");
-    setPassword("");
   }
   
   const handleSignup = async (e) => {
     e.preventDefault();
-    setSignupError("");
+    setSignupErrors({}); // Clear previous errors
     setIsLoading(true);
-    try{
+    try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signup`,{
         name,
         email,
@@ -88,13 +110,26 @@ export default function Signup() {
       }
     } catch(err) {
       console.error("Signup error:", err.response?.data || err.message);
-      setSignupError(err.response?.data?.message || "Signup failed. Please try again.");
+      
+      // Clear form fields on unsuccessful signup
+      setName("");
+      setEmail("");
+      setPassword("");
+      
+      // Updated: Use error.path instead of error.param to match backend response
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        const fieldErrors = {};
+        err.response.data.errors.forEach(error => {
+          fieldErrors[error.path] = error.msg; // Changed from error.param to error.path
+        });
+        setSignupErrors(fieldErrors);
+      } else {
+        // General error
+        setSignupErrors({ general: err.response?.data?.message || "Signup failed. Please try again." });
+      }
     } finally {
       setIsLoading(false);
     }
-    setName("");
-    setEmail("");
-    setPassword("");
   }
 
   return (
@@ -131,22 +166,24 @@ export default function Signup() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       type="email" 
-                      className="form-control" 
+                      className={`form-control ${loginErrors.email ? 'is-invalid' : ''}`}
                       placeholder="Email Address" 
                       required 
                     />
+                    {loginErrors.email && <div className="invalid-feedback">{loginErrors.email}</div>}
                   </div>
                   <div className="mb-4">
                     <input
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       type="password" 
-                      className="form-control" 
+                      className={`form-control ${loginErrors.password ? 'is-invalid' : ''}`}
                       placeholder="Password" 
                       required 
                     />
+                    {loginErrors.password && <div className="invalid-feedback">{loginErrors.password}</div>}
                   </div>
-                  {loginError && <div className="alert alert-danger">{loginError}</div>}
+                  {loginErrors.general && <div className="alert alert-danger">{loginErrors.general}</div>}
                   <div className="mb-3 text-end">
                     <a href="#" className="text-decoration-none fs-6">Forgot Password?</a>
                   </div>
@@ -168,32 +205,35 @@ export default function Signup() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       type="text" 
-                      className="form-control" 
+                      className={`form-control ${signupErrors.name ? 'is-invalid' : ''}`}
                       placeholder="Full Name" 
                       required 
                     />
+                    {signupErrors.name && <div className="invalid-feedback">{signupErrors.name}</div>}
                   </div>
                   <div className="mb-4">
                     <input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       type="email" 
-                      className="form-control" 
+                      className={`form-control ${signupErrors.email ? 'is-invalid' : ''}`}
                       placeholder="Email Address" 
                       required 
                     />
+                    {signupErrors.email && <div className="invalid-feedback">{signupErrors.email}</div>}
                   </div>
                   <div className="mb-4">
                     <input
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       type="password" 
-                      className="form-control" 
+                      className={`form-control ${signupErrors.password ? 'is-invalid' : ''}`}
                       placeholder="Create Password" 
                       required 
                     />
+                    {signupErrors.password && <div className="invalid-feedback">{signupErrors.password}</div>}
                   </div>
-                  {signupError && <div className="alert alert-danger">{signupError}</div>}
+                  {signupErrors.general && <div className="alert alert-danger">{signupErrors.general}</div>}
                   <div className="mb-3 form-check d-flex flex-wrap align-items-center">
                     <input type="checkbox" className="form-check-input me-2" id="termsCheck" required />
                     <label className="form-check-label fs-6" htmlFor="termsCheck">I agree to the Terms & Conditions</label>

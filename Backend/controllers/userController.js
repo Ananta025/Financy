@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { MongoClient } from 'mongodb';
-import {validationResult} from 'express-validator';
+import { validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 dotenv.config();
 import httpStatus from "http-status";
@@ -18,13 +18,13 @@ async function connectClient(){
     await client.connect();
 }
 
-
-
-const signUp = async (req, res) => {
+export const signUp = async (req, res) => {
+    // Check for validation errors
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(httpStatus.BAD_REQUEST).json({errors: errors.array()});
+    if (!errors.isEmpty()) {
+        return res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
     }
+
     const { name, email, password } = req.body;
     try{
         await connectClient();
@@ -48,11 +48,13 @@ const signUp = async (req, res) => {
     }
 };
 
-const signIn = async (req, res) => {
+export const signIn = async (req, res) => {
+    // Check for validation errors
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(httpStatus.BAD_REQUEST).json({errors: errors.array()});
+    if (!errors.isEmpty()) {
+        return res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
     }
+
     const { email, password } = req.body;
     try{
         await connectClient();
@@ -72,7 +74,6 @@ const signIn = async (req, res) => {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
-
 
 const getAllUsers = async (req, res) => {
     try{
@@ -165,8 +166,6 @@ const validateToken = (req, res) => {
 
 export { 
   getAllUsers, 
-  signUp, 
-  signIn, 
   getUserProfile, 
   updateUserProfile, 
   deleteUserProfile,
