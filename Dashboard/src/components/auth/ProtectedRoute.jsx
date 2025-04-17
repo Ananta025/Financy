@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
  */
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -22,7 +23,25 @@ const ProtectedRoute = () => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/signup" replace />;
+    // Use Frontend URL from env variables or fallback to a default
+    let frontendUrl = import.meta.env.VITE_FRONTEND_URL;
+    
+    // Ensure frontend URL doesn't end with a slash
+    if (frontendUrl && frontendUrl.endsWith('/')) {
+      frontendUrl = frontendUrl.slice(0, -1);
+    }
+    
+    // Create full absolute URL without prepending current domain
+    const returnTo = encodeURIComponent(window.location.href);
+    const loginUrl = `${frontendUrl}/login?returnTo=${returnTo}`;
+    
+    console.log("Redirecting to login:", loginUrl);
+    
+    // Use window.location for full URL redirect instead of Navigate
+    window.location.href = loginUrl;
+    
+    // Return null while redirecting
+    return null;
   }
 
   // Render children routes if authenticated

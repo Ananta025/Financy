@@ -154,5 +154,21 @@ const deleteUserProfile = async (req, res) => {
     }
 };
 
+// Add this new function
+const validateToken = (req, res) => {
+  // If the auth middleware passed, the token is valid
+  return res.status(httpStatus.OK).json({
+    valid: true,
+    userId: req.user.userId
+  });
+};
 
-export { getAllUsers, signUp, signIn, getUserProfile, updateUserProfile, deleteUserProfile };
+export { 
+  getAllUsers, 
+  signUp, 
+  signIn, 
+  getUserProfile, 
+  updateUserProfile, 
+  deleteUserProfile,
+  validateToken  // Export the new function
+};

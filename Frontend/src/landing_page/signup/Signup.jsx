@@ -28,13 +28,25 @@ export default function Signup() {
       })
       if(response.status === httpStatus.OK){
         console.log("User logged in successfully");
-        // Instead of storing token in localStorage and redirecting
-        // Redirect with token as URL parameters
+        
+        // Get returnTo parameter if it exists
+        const searchParams = new URLSearchParams(window.location.search);
+        const returnTo = searchParams.get('returnTo');
+        
+        // Get token and userId from response
         const token = response.data.token;
         const userId = response.data.userId;
-        window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
+        
+        // Redirect with token as URL parameters
+        if (returnTo) {
+          // If returnTo URL exists, redirect there with token and userId
+          window.location.href = `${returnTo}?token=${token}&userId=${userId}`;
+        } else {
+          // Otherwise go to dashboard login redirect
+          window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
+        }
       }
-    }catch(err){
+    } catch(err) {
       console.error("Login error:", err.response?.data || err.message);
       setLoginError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {
@@ -56,12 +68,25 @@ export default function Signup() {
       })
       if(response.status === httpStatus.CREATED){
         console.log("User created successfully");
-        // Redirect with token as URL parameters
+        
+        // Get returnTo parameter if it exists
+        const searchParams = new URLSearchParams(window.location.search);
+        const returnTo = searchParams.get('returnTo');
+        
+        // Get token and userId from response
         const token = response.data.token;
         const userId = response.data.userId;
-        window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
+        
+        // Redirect with token as URL parameters
+        if (returnTo) {
+          // If returnTo URL exists, redirect there with token and userId
+          window.location.href = `${returnTo}?token=${token}&userId=${userId}`;
+        } else {
+          // Otherwise go to dashboard login redirect
+          window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
+        }
       }
-    }catch(err){
+    } catch(err) {
       console.error("Signup error:", err.response?.data || err.message);
       setSignupError(err.response?.data?.message || "Signup failed. Please try again.");
     } finally {
