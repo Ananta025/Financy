@@ -4,6 +4,8 @@
 ### 🚀 Live Demo: [Financy](https://financy-zeta.vercel.app)
 
 
+![Homepage](./Frontend/public/media/images/Screenshot%202025-05-29%20013248.png)
+
 
 ## Key Features ✨
 
@@ -17,7 +19,7 @@
 - Educational resources for beginners (no more "stonks kya hota hai?" moments)
 - Mobile-friendly interface - trade while in traffic (but don't do that, really!)
 
-![Homepage](./Frontend/public/media/images/Screenshot%202025-05-29%20013248.png)
+
 
 ## Setup Instructions 🛠️
 
