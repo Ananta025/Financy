@@ -1,8 +1,7 @@
 # Financy 💰 - Modern Investment Platform
 
 
-## 🚀 Live Demo
-Check out Financy live: [Financy](https://financy-zeta.vercel.app)
+### 🚀 Live Demo: [Financy](https://financy-zeta.vercel.app)
 
 
 
@@ -75,11 +74,11 @@ e:\Financy\
 
 We love your input! We want to make contributing to Financy as easy and transparent as possible, whether it's:
 
-- 🐛 Reporting a bug
-- 💡 Submitting a feature request
-- 🧪 Improving test coverage
-- 📝 Improving documentation
-- 🔍 Code review
+🐛 Reporting a bug
+💡 Submitting a feature request
+🧪 Improving test coverage
+📝 Improving documentation
+🔍 Code review
 
 ### Development Process
 
