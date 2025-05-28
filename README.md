@@ -1,30 +1,10 @@
-# Financy 💰 - Your Desi Investment Platform
+# Financy 💰 - Modern Investment Platform
 
-<div align="center">
-  <img src="/Frontend/public/media/images/Logo%20copy.svg" width="80px" alt="Financy Logo"> <span style="font-size: 48px; vertical-align: middle; margin-left: 10px;">Financy</span>
-</div>
 
-## 📸 Screenshots
+## 🚀 Live Demo
+Check out Financy live: [Financy](https://financy-zeta.vercel.app)
 
-<div align="center">
-  <img src=".\Frontend\public\media\images\Screenshot 2025-05-29 013248.png" alt="Financy Dashboard Preview" width="80%">
-  <p><i>Abhi yeh jagah khali hai, jaldi hi hum isse bhardenge! (This space is empty now, we'll fill it soon!)</i></p>
-</div>
 
-## What's Financy All About? 🚀
-
-Financy makes investing as easy as ordering food online! No more frustration with complicated trading platforms. We've got you covered!
-
-With Financy, you can:
-
-- **Invest in Everything**: Stocks, mutual funds, ETFs, bonds... everything in one place!
-- **Zero Brokerage**: Free equity delivery trades - save money, grow your investments!
-- **Real-time Portfolio Tracking**: See your investments go 📈 or 📉 in real time, no more refreshing and praying!
-- **Awesome Charts & Reports**: Data visualizations so good even Warren Buffet would be impressed
-- **Lightning Fast Trading**: Execute trades faster than you can say "I want to invest!"
-- **Learn & Grow**: Master the market without losing your hard-earned money, totally beginner-friendly!
-
-Financy is built in three parts - a snazzy website for the public, a secure dashboard for when you log in, and a robust backend that makes everything tick like a well-oiled machine.
 
 ## Key Features ✨
 
@@ -38,13 +18,15 @@ Financy is built in three parts - a snazzy website for the public, a secure dash
 - Educational resources for beginners (no more "stonks kya hota hai?" moments)
 - Mobile-friendly interface - trade while in traffic (but don't do that, really!)
 
+![Homepage](./Frontend/public/media/images/Screenshot%202025-05-29%20013248.png)
+
 ## Setup Instructions 🛠️
 
 ### Prerequisites
 - Node.js (v16+)
 - MongoDB
 - npm or yarn package manager
-- Thoda sa patience!
+- A little patience!
 
 ### Backend Setup
 ```bash
@@ -89,15 +71,56 @@ e:\Financy\
 └── Dashboard/           # User trading platform - dil
 ```
 
-## Contributing
+## Contributing 🤝
 
-Got ideas? Want to make Financy even better?
-1. Fork karo
-2. Branch banao
-3. Code likho
-4. Pull request bhejo
-5. Famous ho jao! 🌟
+We love your input! We want to make contributing to Financy as easy and transparent as possible, whether it's:
+
+- 🐛 Reporting a bug
+- 💡 Submitting a feature request
+- 🧪 Improving test coverage
+- 📝 Improving documentation
+- 🔍 Code review
+
+### Development Process
+
+1. Fork the repository to your GitHub account
+2. Clone your fork locally
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/Financy.git
+   ```
+3. Create a new branch from `main` for your work
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+4. Make your changes and test thoroughly
+5. Commit with clear, descriptive messages following our style
+   ```bash
+   git commit -m "Add: detailed description of your changes"
+   ```
+6. Push to your branch
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. Open a Pull Request against our `main` branch
+
+### Pull Request Guidelines
+
+- Include screenshots for UI changes
+- Update documentation if needed
+- Add tests for new features
+- Ensure all tests pass
+- Keep PRs focused on a single concern
+- Follow existing code style and conventions
+
+Thanks for helping make Financy better! 🚀
+
+## License 📝
+
+This project is licensed under the MIT License.
+
 
 ## Author
 
 Built with ❤️ by Ananta - Full-stack developer.
+
+- LinkedIn: [ananta-das](https://www.linkedin.com/in/ananta-chandra-das/)
