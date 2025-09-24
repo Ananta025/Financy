@@ -73,7 +73,7 @@ const PositionsPreview = () => {
       
       <div className="space-y-3">
         {positions.map((position) => (
-          <div key={position.id} className="p-3 border rounded-lg hover:bg-gray-50">
+          <div key={position.id} className="p-3 border border-gray-400 rounded-lg hover:bg-gray-50">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">{position.symbol}</h3>

@@ -17,6 +17,31 @@ const NavbarLayout = () => (
   </>
 )
 
+// export default function AppRoutes() {
+//   return (
+//     <Router>
+//       <Routes>
+//         {/* Public route that handles redirects with login tokens */}
+//         <Route path="/login-redirect" element={<LoginRedirect />} />
+        
+//         {/* Protected routes with navbar */}
+//         <Route element={<ProtectedRoute />}>
+//           <Route element={<NavbarLayout />}>
+//             <Route path="/" element={<HomePage />} />
+//             <Route path="/orders" element={<OrdersPage />} />
+//             <Route path="/holdings" element={<HoldingPage />} />
+//             <Route path="/position" element={<PositionPage />} />
+//             <Route path="/account" element={<AccountPage />} />
+//           </Route>
+//         </Route>
+        
+//         {/* 404 route */}
+//         <Route path="*" element={<NotFoundPage />} />
+//       </Routes>
+//     </Router>
+//   )
+// }
+
 export default function AppRoutes() {
   return (
     <Router>
@@ -25,15 +50,13 @@ export default function AppRoutes() {
         <Route path="/login-redirect" element={<LoginRedirect />} />
         
         {/* Protected routes with navbar */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<NavbarLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/holdings" element={<HoldingPage />} />
+        <Route element={<NavbarLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/holdings" element={<HoldingPage />} />
             <Route path="/position" element={<PositionPage />} />
             <Route path="/account" element={<AccountPage />} />
           </Route>
-        </Route>
         
         {/* 404 route */}
         <Route path="*" element={<NotFoundPage />} />

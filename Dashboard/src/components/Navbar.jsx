@@ -65,7 +65,7 @@ export default function Navbar() {
                         Orders
                     </Link>
                     <Link 
-                        to="/holding" 
+                        to="/holdings" 
                         className={`text-decoration-none transition-all duration-200 py-2 rounded-lg px-3 ${getActiveLinkClass("/holding")}`}
                     >
                         Holdings

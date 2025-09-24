@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, useMediaQuery, useTheme } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import axios from 'axios';
+import orderService from '../services/orderService';
 
-const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, orderDetails }) => {
+const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, orderDetails, onOrderSuccess }) => {
   const [quantity, setQuantity] = useState(orderDetails ? orderDetails.quantity : 1);
   const [total, setTotal] = useState(orderDetails ? orderDetails.total : stockPrice);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -15,28 +17,44 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
     setTotal((newQuantity * stockPrice).toFixed(2));
   };
   
-  const handleSubmit = () => {
-    // Prepare the order data
-    const orderData = {
-      name: stockName,
-      qty: quantity,
-      price: stockPrice,
-      mode: tradeType,
-      orderType: orderDetails ? orderDetails.orderType : 'market',
-      limitPrice: orderDetails?.limitPrice || stockPrice,
-      triggerPrice: orderDetails?.triggerPrice || null,
-      total: parseFloat(total)
-    };
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError('');
     
-    // Send the order to the server
-    axios.post('http://localhost:3000/new-order', orderData)
-      .then((res) => {
-        console.log(res.data);
+    try {
+      // Prepare the order data according to the new API schema
+      const orderData = {
+        stock: stockName,
+        type: tradeType,
+        quantity: quantity,
+        price: stockPrice,
+        orderType: orderDetails ? orderDetails.orderType : 'market',
+        limitPrice: orderDetails?.limitPrice || stockPrice,
+        triggerPrice: orderDetails?.triggerPrice || null,
+        total: parseFloat(total)
+      };
+      
+      // Send the order to the server
+      const response = await orderService.createOrder(orderData);
+      
+      if (response.success) {
+        console.log('Order created successfully:', response.order);
+        
+        // Call the success callback if provided
+        if (onOrderSuccess && typeof onOrderSuccess === 'function') {
+          onOrderSuccess(response.order);
+        }
+        
         handleClose();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+      } else {
+        throw new Error(response.message || 'Failed to create order');
+      }
+    } catch (err) {
+      console.error('Error creating order:', err);
+      setError(err.message || 'Failed to create order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -153,6 +171,14 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
             Total Amount: ₹{total}
           </Typography>
           
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <Typography variant="body2" sx={{ color: 'red' }}>
+                {error}
+              </Typography>
+            </div>
+          )}
+          
           <div className="bg-gray-50 p-3 rounded-md text-sm">
             <p className="text-gray-600 mb-1">
               By placing this order, you agree to our Terms of Service and acknowledge that you have read our Privacy Policy.
@@ -167,17 +193,21 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
           fullWidth 
           variant="contained" 
           onClick={handleSubmit}
+          disabled={isSubmitting}
           sx={{
             bgcolor: tradeType === 'Buy' ? '#4caf50' : '#f44336',
             '&:hover': {
               bgcolor: tradeType === 'Buy' ? '#388e3c' : '#d32f2f',
+            },
+            '&:disabled': {
+              bgcolor: '#cccccc',
             },
             py: { xs: 1.2, sm: 1.5 },
             fontSize: { xs: '0.9rem', sm: '1rem' },
             mt: 1
           }}
         >
-          Confirm {tradeType} Order
+          {isSubmitting ? 'Processing...' : `Confirm ${tradeType} Order`}
         </Button>
       </Box>
     </Modal>

@@ -19,6 +19,14 @@ export default function OrdersPage() {
   const [openTradeModal, setOpenTradeModal] = useState(false);
   const [tradeType, setTradeType] = useState('Buy');
   const [orderPreview, setOrderPreview] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Function to handle successful order creation
+  const handleOrderSuccess = (newOrder) => {
+    console.log('Order created successfully:', newOrder);
+    // Trigger refresh of recent orders list
+    setRefreshTrigger(prev => prev + 1);
+  };
   
   // Simulated live price update
   useEffect(() => {
@@ -28,7 +36,7 @@ export default function OrdersPage() {
         setSelectedStock(prev => ({
           ...prev,
           price: parseFloat((prev.price + priceChange).toFixed(2)),
-          percent: parseFloat((prev.percent + priceChange / 10).toFixed(2)),
+          percent: parseFloat((parseFloat(prev.percent) + priceChange / 10).toFixed(2)),
           isDown: priceChange < 0
         }));
       }, 5000); // Update every 5 seconds
@@ -153,7 +161,7 @@ export default function OrdersPage() {
         
         {/* Right Column - Recent Orders */}
         <div className="lg:col-span-1">
-          <RecentOrdersList />
+          <RecentOrdersList refreshTrigger={refreshTrigger} />
         </div>
       </div>
       
@@ -166,6 +174,7 @@ export default function OrdersPage() {
           stockName={selectedStock.name}
           stockPrice={selectedStock.price}
           orderDetails={orderPreview}
+          onOrderSuccess={handleOrderSuccess}
         />
       )}
     </div>

@@ -10,6 +10,7 @@ import Holding from './models/holdingModel.js';
 import Order from './models/orderModel.js';
 
 import userRoutes from './routes/userRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 
 
 
@@ -34,6 +35,7 @@ mongoose.connect(mongo_url).then(() => {
 });
 
 app.use('/users', userRoutes);
+app.use('/orders', orderRoutes);
 
 
 app.get('/', (req, res) => {
@@ -222,14 +224,12 @@ app.get("/allpositions",async(req,res)=>{
 })
 
 app.post("/new-order", async(req,res)=>{
-    let order = new Order({
-        name : req.body.name,
-        qty: req.body.qty,
-        price: req.body.price,
-        mode : req.body.mode,
+    // Legacy endpoint - deprecated. Please use /orders/create
+    res.status(410).json({
+        success: false,
+        message: "This endpoint is deprecated. Please use /orders/create instead.",
+        redirectTo: "/orders/create"
     });
-    await order.save();
-    res.send("Order added successfully");
 })
 
 app.listen(port, ()=>{

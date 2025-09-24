@@ -1,59 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import orderService from '../../services/orderService';
+import { useAuth } from '../../context/AuthContext';
 
-const RecentOrdersList = () => {
-  // Simulated recent orders data
-  const [recentOrders] = useState([
-    {
-      id: '3245',
-      stock: 'AAPL',
-      type: 'Buy',
-      quantity: 5,
-      price: 182.34,
-      orderType: 'Market',
-      status: 'Completed',
-      time: '2023-06-15T14:32:00'
-    },
-    {
-      id: '3244',
-      stock: 'GOOGL',
-      type: 'Buy',
-      quantity: 2,
-      price: 124.18,
-      orderType: 'Limit',
-      status: 'Completed',
-      time: '2023-06-15T13:10:00'
-    },
-    {
-      id: '3243',
-      stock: 'TSLA',
-      type: 'Sell',
-      quantity: 3,
-      price: 246.79,
-      orderType: 'Market',
-      status: 'Completed',
-      time: '2023-06-15T11:45:00'
-    },
-    {
-      id: '3242',
-      stock: 'MSFT',
-      type: 'Buy',
-      quantity: 10,
-      price: 334.22,
-      orderType: 'Limit',
-      status: 'Pending',
-      time: '2023-06-15T10:20:00'
-    },
-    {
-      id: '3241',
-      stock: 'AMZN',
-      type: 'Sell',
-      quantity: 4,
-      price: 127.90,
-      orderType: 'Stop Loss',
-      status: 'Cancelled',
-      time: '2023-06-14T15:55:00'
+const RecentOrdersList = ({ refreshTrigger }) => {
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const { isAuthenticated } = useAuth();
+
+  // Function to fetch orders from the backend
+  const fetchOrders = async () => {
+    if (!isAuthenticated) {
+      setRecentOrders([]);
+      setIsLoading(false);
+      return;
     }
-  ]);
+
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      const response = await orderService.getUserOrders(1, 5); // Get latest 5 orders
+      
+      if (response.success) {
+        // Transform backend data to match the expected frontend format
+        const transformedOrders = response.orders.map(order => ({
+          id: order._id,
+          stock: order.stock,
+          type: order.type,
+          quantity: order.quantity,
+          price: order.price,
+          orderType: order.orderType === 'market' ? 'Market' : 
+                     order.orderType === 'limit' ? 'Limit' : 'Stop Loss',
+          status: order.status,
+          time: order.createdAt
+        }));
+        
+        setRecentOrders(transformedOrders);
+      } else {
+        throw new Error(response.message || 'Failed to fetch orders');
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError(err.message || 'Failed to load recent orders');
+      setRecentOrders([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch orders on component mount and when auth status changes
+  useEffect(() => {
+    fetchOrders();
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Refresh orders when refreshTrigger changes (after a new order is placed)
+  useEffect(() => {
+    if (refreshTrigger && isAuthenticated) {
+      fetchOrders();
+    }
+  }, [refreshTrigger, isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getStatusBadgeClass = (status) => {
     switch(status) {
@@ -77,75 +83,110 @@ const RecentOrdersList = () => {
     <div className="bg-white rounded-lg shadow p-4">
       <h2 className="font-medium text-gray-700 mb-4">Recent Orders</h2>
       
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
-              </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Details
-              </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {recentOrders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                      order.type === 'Buy' ? 'bg-green-100' : 'bg-red-100'
-                    }`}>
-                      {order.type === 'Buy' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">{order.stock}</div>
-                      <div className="text-xs text-gray-500">{order.type}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {order.quantity} × ₹{order.price}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {order.orderType} • {formatDate(order.time)}
-                  </div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
-                    {order.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      
-      {recentOrders.length === 0 && (
-        <div className="text-center py-4">
-          <p className="text-gray-500">No recent orders</p>
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{error}</p>
+          <button 
+            onClick={fetchOrders}
+            className="mt-2 text-sm text-red-700 hover:text-red-900 underline"
+          >
+            Try again
+          </button>
         </div>
       )}
       
-      <div className="mt-4">
-        <button className="w-full py-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none">
-          View All Orders
-        </button>
-      </div>
+      {isLoading && (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      )}
+      
+      {!isLoading && !error && !isAuthenticated && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Please log in to view your recent orders</p>
+        </div>
+      )}
+      
+      {!isLoading && !error && isAuthenticated && (
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Details
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {recentOrders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
+                          order.type === 'Buy' ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                          {order.type === 'Buy' ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">{order.stock}</div>
+                          <div className="text-xs text-gray-500">{order.type}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {order.quantity} × ₹{order.price}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {order.orderType} • {formatDate(order.time)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {recentOrders.length === 0 && (
+            <div className="text-center py-8">
+              <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+              <p className="text-gray-500">Start trading to see your recent orders here</p>
+            </div>
+          )}
+          
+          <div className="mt-4">
+            <button 
+              onClick={fetchOrders}
+              className="w-full py-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none border border-blue-200 rounded-md hover:bg-blue-50"
+            >
+              Refresh Orders
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -53,7 +53,7 @@ const MarketOverview = () => {
       {/* Market Indices */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {marketIndices.map((index, i) => (
-          <div key={i} className="p-3 border rounded-lg">
+          <div key={i} className="p-3 border border-gray-400 rounded-lg">
             <p className="text-sm text-gray-500">{index.name}</p>
             <p className="text-lg font-semibold">{index.value.toLocaleString()}</p>
             <div className={`flex items-center mt-1 ${index.isUp ? 'text-green-600' : 'text-red-600'}`}>

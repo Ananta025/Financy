@@ -102,7 +102,7 @@ const Watchlist = () => {
       
       <div className="space-y-2">
         {watchlistStocks.map((stock) => (
-          <div key={stock.id} className="p-3 border rounded-lg hover:bg-gray-50">
+          <div key={stock.id} className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">{stock.symbol}</h3>

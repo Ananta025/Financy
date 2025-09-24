@@ -59,7 +59,7 @@ const HoldingsPreview = () => {
       
       <div className="space-y-3">
         {holdings.map((holding) => (
-          <div key={holding.id} className="p-3 border rounded-lg hover:bg-gray-50">
+          <div key={holding.id} className="p-3 border border-gray-400 rounded-lg hover:bg-gray-50">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">{holding.symbol}</h3>
@@ -73,7 +73,7 @@ const HoldingsPreview = () => {
               </div>
             </div>
             
-            <div className="mt-2 pt-2 border-t flex justify-between items-center">
+            <div className="mt-2 pt-2 border-t border-gray-300 flex justify-between items-center">
               <div>
                 <p className="text-xs text-gray-500">Invested</p>
                 <p className="font-medium text-sm">{formatCurrency(holding.investedValue)}</p>
