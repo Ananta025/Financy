@@ -1,20 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, useMediaQuery, useTheme } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import orderService from '../services/orderService';
+import { useTrading } from '../context/tradingHooks.js';
+import TradingService from '../services/tradingService.js';
 
 const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, orderDetails, onOrderSuccess }) => {
-  const [quantity, setQuantity] = useState(orderDetails ? orderDetails.quantity : 1);
-  const [total, setTotal] = useState(orderDetails ? orderDetails.total : stockPrice);
+  const [quantity, setQuantity] = useState(orderDetails?.quantity || 1);
+  const [total, setTotal] = useState(orderDetails?.total || parseFloat((stockPrice * 1).toFixed(2)));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const { createOrder } = useTrading();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  // Update state when orderDetails changes (when modal opens with new order data)
+  useEffect(() => {
+    if (orderDetails) {
+      setQuantity(orderDetails.quantity || 1);
+      setTotal(orderDetails.total || parseFloat((stockPrice * (orderDetails.quantity || 1)).toFixed(2)));
+    } else {
+      setQuantity(1);
+      setTotal(parseFloat((stockPrice * 1).toFixed(2)));
+    }
+    // Reset error state when modal opens with new data
+    setError('');
+  }, [orderDetails, stockPrice]);
   
   const handleQuantityChange = (e) => {
     const newQuantity = parseInt(e.target.value) || 1;
     setQuantity(newQuantity);
-    setTotal((newQuantity * stockPrice).toFixed(2));
+    setTotal(parseFloat((newQuantity * stockPrice).toFixed(2)));
   };
   
   const handleSubmit = async () => {
@@ -31,11 +46,17 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
         orderType: orderDetails ? orderDetails.orderType : 'market',
         limitPrice: orderDetails?.limitPrice || stockPrice,
         triggerPrice: orderDetails?.triggerPrice || null,
-        total: parseFloat(total)
+        total: parseFloat((quantity * stockPrice).toFixed(2)) // Calculate total to match validation expectation
       };
       
-      // Send the order to the server
-      const response = await orderService.createOrder(orderData);
+      // Validate the order data first
+      const validation = TradingService.validateOrderData(orderData);
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(', '));
+      }
+
+      // Send the order to the server using the trading context
+      const response = await createOrder(orderData);
       
       if (response.success) {
         console.log('Order created successfully:', response.order);
@@ -107,7 +128,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
           />
         </div>
         
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
             <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
               {stockName}
@@ -118,7 +139,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
           </div>
           
           {orderDetails && (
-            <div className="bg-gray-50 p-3 rounded-md mb-4">
+            <div className="bg-gray-50 p-3 rounded-md mb-3">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-gray-600">Order Type:</span>
@@ -159,7 +180,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
           />
         </div>
         
-        <div className="mb-6">
+        <div className="mb-4">
           <Typography 
             variant="subtitle1" 
             sx={{ 
@@ -179,7 +200,7 @@ const TradeModal = ({ open, handleClose, tradeType, stockName, stockPrice, order
             </div>
           )}
           
-          <div className="bg-gray-50 p-3 rounded-md text-sm">
+          <div className="bg-gray-50 p-2 rounded-md text-xs">
             <p className="text-gray-600 mb-1">
               By placing this order, you agree to our Terms of Service and acknowledge that you have read our Privacy Policy.
             </p>

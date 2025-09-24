@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function BankAccountInfo() {
+  const { user } = useAuth();
   const [isAddingAccount, setIsAddingAccount] = useState(false);
   const [bankAccount, setBankAccount] = useState({
     accountNumber: '********7890',
     ifscCode: 'SBIN0001234',
-    accountHolder: 'Ananta Dhungana',
+    accountHolder: user?.name || 'Account Holder',
     bankName: 'State Bank of India'
   });
   
   const [formData, setFormData] = useState({
     accountNumber: '',
     ifscCode: '',
-    accountHolder: '',
+    accountHolder: user?.name || '',
     bankName: ''
   });
+
+  // Update account holder name when user data changes
+  useEffect(() => {
+    if (user?.name) {
+      setBankAccount(prev => ({
+        ...prev,
+        accountHolder: user.name
+      }));
+      setFormData(prev => ({
+        ...prev,
+        accountHolder: user.name
+      }));
+    }
+  }, [user?.name]);
   
   const handleChange = (e) => {
     setFormData({

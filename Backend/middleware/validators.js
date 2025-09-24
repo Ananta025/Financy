@@ -47,11 +47,25 @@ export const validateOrder = [
   
   check('quantity')
     .not().isEmpty().withMessage('Quantity is required')
-    .isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
+    .isNumeric().withMessage('Quantity must be a number')
+    .custom((value) => {
+      const numValue = parseInt(value);
+      if (numValue < 1) {
+        throw new Error('Quantity must be at least 1');
+      }
+      return true;
+    }),
   
   check('price')
     .not().isEmpty().withMessage('Price is required')
-    .isFloat({ min: 0.01 }).withMessage('Price must be a positive number'),
+    .isNumeric().withMessage('Price must be a number')
+    .custom((value) => {
+      const numValue = parseFloat(value);
+      if (numValue <= 0) {
+        throw new Error('Price must be greater than 0');
+      }
+      return true;
+    }),
   
   check('orderType')
     .optional()
@@ -59,13 +73,60 @@ export const validateOrder = [
   
   check('limitPrice')
     .optional()
-    .isFloat({ min: 0.01 }).withMessage('Limit price must be a positive number'),
+    .isNumeric().withMessage('Limit price must be a number')
+    .custom((value, { req }) => {
+      if (req.body.orderType !== 'market' && (!value || parseFloat(value) <= 0)) {
+        throw new Error('Limit price is required for non-market orders and must be greater than 0');
+      }
+      return true;
+    }),
   
   check('triggerPrice')
     .optional()
-    .isFloat({ min: 0.01 }).withMessage('Trigger price must be a positive number'),
+    .isNumeric().withMessage('Trigger price must be a number')
+    .custom((value, { req }) => {
+      if (req.body.orderType === 'sl' && (!value || parseFloat(value) <= 0)) {
+        throw new Error('Trigger price is required for stop loss orders and must be greater than 0');
+      }
+      return true;
+    }),
   
   check('total')
     .not().isEmpty().withMessage('Total amount is required')
-    .isFloat({ min: 0.01 }).withMessage('Total amount must be a positive number')
+    .isNumeric().withMessage('Total amount must be a number')
+    .custom((value, { req }) => {
+      const numValue = parseFloat(value);
+      if (numValue <= 0) {
+        throw new Error('Total amount must be greater than 0');
+      }
+      
+      // Validate total matches quantity * price with tolerance
+      const quantity = parseInt(req.body.quantity) || 0;
+      const price = parseFloat(req.body.price) || 0;
+      const expectedTotal = parseFloat((quantity * price).toFixed(2));
+      const tolerance = 0.02;
+      
+      if (Math.abs(numValue - expectedTotal) > tolerance) {
+        throw new Error(`Total amount (${numValue}) does not match quantity × price (${expectedTotal})`);
+      }
+      
+      return true;
+    })
+];
+
+/**
+ * Validation rules for exiting a position
+ */
+export const validateExitPosition = [
+  check('quantity')
+    .not().isEmpty().withMessage('Quantity is required')
+    .isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
+  
+  check('exitPrice')
+    .optional()
+    .isFloat({ min: 0.01 }).withMessage('Exit price must be a positive number'),
+  
+  check('orderType')
+    .optional()
+    .isIn(['market', 'limit']).withMessage('Order type must be market or limit')
 ];

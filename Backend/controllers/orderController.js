@@ -1,22 +1,43 @@
 import Order from '../models/orderModel.js';
+import User from '../models/userModel.js'; // Import User model to ensure schema registration
 import { validationResult } from 'express-validator';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
+import { updateOrCreateHolding } from './holdingController.js';
+import { createPosition } from './positionController.js';
 
-// Create a new order
+// Create a new order with atomic holdings/positions update
 export const createOrder = async (req, res) => {
+    const session = await mongoose.startSession();
+    let transactionCommitted = false;
+    let transactionStarted = false;
+    
     try {
+        // Start transaction
+        await session.startTransaction();
+        transactionStarted = true;
+        console.log('Transaction started successfully');
+        
+        // Add comprehensive logging for debugging
+        console.log('=== ORDER CREATION DEBUG ===');
+        console.log('Request Headers:', req.headers);
+        console.log('Request Body:', JSON.stringify(req.body, null, 2));
+        console.log('User from token:', req.user);
+        console.log('Body keys:', Object.keys(req.body));
+        console.log('Body types:', Object.keys(req.body).reduce((acc, key) => {
+            acc[key] = typeof req.body[key];
+            return acc;
+        }, {}));
+        
         // Check for validation errors
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(httpStatus.BAD_REQUEST).json({ 
-                success: false,
-                message: 'Validation errors',
-                errors: errors.array() 
-            });
+            console.log('Validation errors:', errors.array());
+            // Don't abort here, let it be handled in the catch block
+            throw new Error(`Validation failed: ${errors.array().map(e => e.msg).join(', ')}`);
         }
 
-        const userId = req.user.userId; // From auth middleware
+        const userId = req.user.userId;
         const {
             stock,
             type,
@@ -27,6 +48,8 @@ export const createOrder = async (req, res) => {
             triggerPrice,
             total
         } = req.body;
+
+        console.log('Creating order with data:', { userId, stock, type, quantity, price, total });
 
         // Create new order
         const newOrder = new Order({
@@ -42,24 +65,109 @@ export const createOrder = async (req, res) => {
             status: 'Completed' // For demo purposes, marking as completed immediately
         });
 
-        const savedOrder = await newOrder.save();
+        console.log('Saving order to database...');
+        const savedOrder = await newOrder.save({ session });
+        console.log('Order saved successfully:', savedOrder._id);
+
+        // Update holdings based on order
+        console.log('Updating holdings...');
+        const holding = await updateOrCreateHolding(userId, {
+            stock,
+            type,
+            quantity,
+            price
+        }, session);
+        console.log('Holdings updated successfully');
+
+        // Create position for intraday orders (simplified logic)
+        let position = null;
+        if (orderType === 'market' || type === 'Sell') {
+            console.log('Creating position...');
+            position = await createPosition(userId, {
+                stock,
+                type,
+                quantity,
+                price,
+                orderType,
+                orderId: savedOrder._id
+            }, session);
+            console.log('Position created successfully');
+        }
+
+        // Commit transaction
+        console.log('Committing transaction...');
+        await session.commitTransaction();
+        transactionCommitted = true;
+        console.log('Transaction committed successfully');
+
+        console.log('Order creation completed successfully');
         
-        // Populate user info if needed
-        await savedOrder.populate('userId', 'name email');
+        // Prepare response data (populate outside of transaction)
+        let populatedOrder;
+        try {
+            console.log('Populating user info...');
+            populatedOrder = await Order.findById(savedOrder._id).populate('userId', 'name email');
+            console.log('User info populated successfully');
+        } catch (populateError) {
+            console.warn('Failed to populate user info, using original order:', populateError.message);
+            populatedOrder = savedOrder;
+        }
 
         return res.status(httpStatus.CREATED).json({
             success: true,
-            message: 'Order created successfully',
-            order: savedOrder
+            message: 'Order executed successfully',
+            order: populatedOrder,
+            holding,
+            position
         });
 
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('Error during order creation:', error);
+        
+        // Only abort transaction if it was started and not committed
+        if (transactionStarted && !transactionCommitted) {
+            try {
+                console.log('Aborting transaction due to error...');
+                await session.abortTransaction();
+                console.log('Transaction aborted successfully');
+            } catch (abortError) {
+                console.error('Error aborting transaction:', abortError);
+            }
+        }
+        
+        // Handle specific business logic errors
+        if (error.message && error.message.includes('Insufficient holdings')) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                success: false,
+                message: error.message
+            });
+        }
+        
+        // Handle validation errors
+        if (error.message && error.message.includes('Validation failed')) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                success: false,
+                message: 'Validation errors',
+                error: error.message,
+                receivedData: req.body
+            });
+        }
+        
+        // Generic error response
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Internal server error',
             error: error.message
         });
+    } finally {
+        // Always end the session
+        try {
+            console.log('Ending database session...');
+            await session.endSession();
+            console.log('Database session ended successfully');
+        } catch (sessionError) {
+            console.error('Error ending session:', sessionError);
+        }
     }
 };
 
@@ -71,15 +179,29 @@ export const getUserOrders = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
+        console.log(`Fetching orders for user ${userId}, page ${page}, limit ${limit}`);
+
         // Get orders for the authenticated user, sorted by creation date (newest first)
-        const orders = await Order.find({ userId })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('userId', 'name email');
+        let orders;
+        try {
+            orders = await Order.find({ userId })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate('userId', 'name email');
+            console.log(`Successfully fetched ${orders.length} orders with populated user info`);
+        } catch (populateError) {
+            console.warn('Failed to populate user info, fetching orders without population:', populateError.message);
+            orders = await Order.find({ userId })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+        }
 
         // Get total count for pagination
         const totalOrders = await Order.countDocuments({ userId });
+
+        console.log(`Total orders for user: ${totalOrders}`);
 
         return res.status(httpStatus.OK).json({
             success: true,

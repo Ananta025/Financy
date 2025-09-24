@@ -20,11 +20,11 @@ const OrderForm = ({ stock, tradeType, onTradeTypeChange, onSubmit }) => {
     if (stock) {
       let calculatedTotal;
       if (orderType === 'market') {
-        calculatedTotal = quantity * stock.price;
+        calculatedTotal = parseFloat((quantity * stock.price).toFixed(2));
       } else if (orderType === 'limit') {
-        calculatedTotal = quantity * limitPrice;
+        calculatedTotal = parseFloat((quantity * limitPrice).toFixed(2));
       } else { // stop loss
-        calculatedTotal = quantity * limitPrice;
+        calculatedTotal = parseFloat((quantity * limitPrice).toFixed(2));
       }
       setTotal(calculatedTotal);
     }
@@ -48,6 +48,16 @@ const OrderForm = ({ stock, tradeType, onTradeTypeChange, onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Recalculate total to ensure precision consistency
+    let finalTotal;
+    if (orderType === 'market') {
+      finalTotal = parseFloat((quantity * stock.price).toFixed(2));
+    } else if (orderType === 'limit') {
+      finalTotal = parseFloat((quantity * limitPrice).toFixed(2));
+    } else { // stop loss
+      finalTotal = parseFloat((quantity * limitPrice).toFixed(2));
+    }
+    
     const orderData = {
       stock,
       tradeType,
@@ -55,7 +65,7 @@ const OrderForm = ({ stock, tradeType, onTradeTypeChange, onSubmit }) => {
       quantity,
       limitPrice: orderType !== 'market' ? limitPrice : stock.price,
       triggerPrice: orderType === 'sl' ? triggerPrice : null,
-      total
+      total: finalTotal
     };
     
     onSubmit(orderData);

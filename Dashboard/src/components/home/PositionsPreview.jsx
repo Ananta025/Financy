@@ -1,51 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTrading } from '../../context/tradingHooks.js';
+import TradingService from '../../services/tradingService.js';
 import ExitPositionModal from '../position/ExitPositionModal';
 
 const PositionsPreview = () => {
   const [showExitModal, setShowExitModal] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
   
-  // Sample positions data
-  const positions = [
-    { 
-      id: 1,
-      name: 'Infosys',
-      symbol: 'INFY',
-      type: 'MIS',
-      quantity: 10,
-      entryPrice: 1475.50,
-      currentPrice: 1498.25,
-      pnl: 227.50,
-      pnlPercent: 1.54
-    },
-    { 
-      id: 2,
-      name: 'Bharti Airtel',
-      symbol: 'BHARTIARTL',
-      type: 'MIS',
-      quantity: 20,
-      entryPrice: 875.25,
-      currentPrice: 868.75,
-      pnl: -130.00,
-      pnlPercent: -0.74
-    },
-    { 
-      id: 3,
-      name: 'State Bank of India',
-      symbol: 'SBIN',
-      type: 'MIS',
-      quantity: 25,
-      entryPrice: 580.50,
-      currentPrice: 590.25,
-      pnl: 243.75,
-      pnlPercent: 1.68
-    }
-  ];
+  const { positions, loading, errors, exitPosition } = useTrading();
+  
+  const isLoading = loading.positions;
+  const error = errors.positions;
 
   // Format currency values
   const formatCurrency = (value) => {
-    return '₹' + value.toLocaleString();
+    return TradingService.formatCurrency(value);
   };
   
   const handleOpenExitModal = (position) => {
@@ -58,11 +28,52 @@ const PositionsPreview = () => {
     setSelectedPosition(null);
   };
   
-  const handleExitPosition = (id, qty, options) => {
-    console.log(`Exiting position ${id}, quantity: ${qty}, options:`, options);
-    // This would call an API in a real app
-    handleCloseExitModal();
+  const handleExitPosition = async (positionId, exitData) => {
+    try {
+      const result = await exitPosition(positionId, exitData);
+      if (result.success) {
+        console.log('Position exited successfully');
+        handleCloseExitModal();
+      } else {
+        console.error('Failed to exit position:', result.error);
+        // TODO: Show error notification
+      }
+    } catch (err) {
+      console.error('Error exiting position:', err);
+      // TODO: Show error notification
+    }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Open Positions</h2>
+          <Link to="/position" className="text-sm text-blue-600 hover:underline">View All</Link>
+        </div>
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Open Positions</h2>
+          <Link to="/position" className="text-sm text-blue-600 hover:underline">View All</Link>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-2">Failed to load positions</p>
+          <p className="text-sm text-gray-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
@@ -73,13 +84,13 @@ const PositionsPreview = () => {
       
       <div className="space-y-3">
         {positions.map((position) => (
-          <div key={position.id} className="p-3 border border-gray-400 rounded-lg hover:bg-gray-50">
+          <div key={position._id} className="p-3 border border-gray-400 rounded-lg hover:bg-gray-50">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-medium">{position.symbol}</h3>
+                <h3 className="font-medium">{position.stock}</h3>
                 <div className="flex items-center space-x-2">
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">
-                    {position.type}
+                    {position.type || 'MIS'}
                   </span>
                   <span className="text-xs text-gray-500">{position.quantity} qty</span>
                 </div>
@@ -87,7 +98,7 @@ const PositionsPreview = () => {
               <div className="text-right">
                 <p className="font-medium">{formatCurrency(position.currentPrice)}</p>
                 <p className={`text-xs font-medium ${position.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {position.pnl >= 0 ? '+' : ''}{formatCurrency(position.pnl)} ({Math.abs(position.pnlPercent)}%)
+                  {position.pnl >= 0 ? '+' : ''}{formatCurrency(Math.abs(position.pnl))} ({Math.abs(position.pnlPercent).toFixed(2)}%)
                 </p>
               </div>
             </div>

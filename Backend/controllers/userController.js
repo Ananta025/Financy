@@ -1,7 +1,7 @@
 // import User from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import { validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -93,7 +93,7 @@ const getUserProfile = async (req, res) => {
         await connectClient();
         const db = client.db("financy");
         const user = await db.collection("users").findOne({ 
-            _id: new MongoClient.ObjectId(userId)
+            _id: new ObjectId(userId)
          });
         if(!user){
             return res.status(httpStatus.NOT_FOUND).send("User not found!");
@@ -113,18 +113,23 @@ const updateUserProfile = async (req, res) => {
         await connectClient();
         const db = client.db("financy");
         const user = await db.collection("users").findOne({ 
-            _id: new MongoClient.ObjectId(userId)
+            _id: new ObjectId(userId)
          });
         if(!user){
             return res.status(httpStatus.NOT_FOUND).send("User not found!");
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        await db.collection("users").updateOne({ _id: new MongoClient.ObjectId(userId) }, {
-            $set: {
-                name,
-                email,
-                password: hashedPassword
-            }
+        
+        // Prepare update object
+        const updateData = { name, email };
+        
+        // Only hash and update password if it's provided
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updateData.password = hashedPassword;
+        }
+        
+        await db.collection("users").updateOne({ _id: new ObjectId(userId) }, {
+            $set: updateData
         });
         return res.status(httpStatus.OK).send("User Profile Updated");
     }catch(err){
@@ -140,13 +145,13 @@ const deleteUserProfile = async (req, res) => {
         await connectClient();
         const db = client.db("financy");
         const user = await db.collection("users").findOne({ 
-            _id: new MongoClient.ObjectId(userId)
+            _id: new ObjectId(userId)
          });
         if(!user){
             return res.status(httpStatus.NOT_FOUND).send("User not found!");
         }
         await db.collection("users").deleteOne({ 
-            _id: new MongoClient.ObjectId(userId)
+            _id: new ObjectId(userId)
          });
         return res.status(httpStatus.OK).send("User Profile Deleted");
     }catch(err){

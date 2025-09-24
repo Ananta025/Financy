@@ -5,12 +5,16 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 import mongoose from 'mongoose';
-import Position from './models/positionModel.js';
-import Holding from './models/holdingModel.js';
+// Import all models to ensure they are registered with mongoose
+import User from './models/userModel.js';
 import Order from './models/orderModel.js';
+import Holding from './models/holdingModel.js';
+import Position from './models/positionModel.js';
 
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import holdingRoutes from './routes/holdingRoutes.js';
+import positionRoutes from './routes/positionRoutes.js';
 
 
 
@@ -36,6 +40,8 @@ mongoose.connect(mongo_url).then(() => {
 
 app.use('/users', userRoutes);
 app.use('/orders', orderRoutes);
+app.use('/holdings', holdingRoutes);
+app.use('/positions', positionRoutes);
 
 
 app.get('/', (req, res) => {

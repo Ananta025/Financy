@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../services/authService';
+import userService from '../services/userService';
 
 const AuthContext = createContext();
 
@@ -11,6 +12,45 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+
+  // Function to fetch and set user profile data
+  const fetchUserProfile = async (userId) => {
+    try {
+      const profile = await userService.getUserProfile(userId);
+      setUser({
+        id: userId,
+        name: profile.name,
+        email: profile.email,
+        // Add any other profile fields as needed
+        ...profile
+      });
+      return profile;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      // Set basic user info even if profile fetch fails
+      setUser({ id: userId });
+      return null;
+    }
+  };
+
+  // Function to update user profile
+  const updateUserProfile = async (profileData) => {
+    try {
+      if (!user?.id) {
+        throw new Error('No user logged in');
+      }
+      
+      await userService.updateUserProfile(user.id, profileData);
+      
+      // Refresh user profile after update
+      await fetchUserProfile(user.id);
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -27,13 +67,14 @@ export const AuthProvider = ({ children }) => {
         
         // If we have a token (either from localStorage or freshly set from params)
         if (authService.isAuthenticated()) {
+          const userId = authService.getUserId();
+          
           // If we just got the token from URL params, consider it valid without extra check
           if (gotTokenFromParams) {
             console.log("Using token from params, skipping validation");
             setIsAuthenticated(true);
-            setUser({
-              id: authService.getUserId()
-            });
+            // Fetch user profile data
+            await fetchUserProfile(userId);
           } else {
             // Otherwise validate with backend
             try {
@@ -42,9 +83,8 @@ export const AuthProvider = ({ children }) => {
               if (isValid) {
                 console.log("Token validated successfully");
                 setIsAuthenticated(true);
-                setUser({
-                  id: authService.getUserId()
-                });
+                // Fetch user profile data
+                await fetchUserProfile(userId);
               } else {
                 console.log("Token validation failed");
                 authService.logout();
@@ -71,12 +111,14 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = (token, userId) => {
+  const login = async (token, userId) => {
     console.log("Login called with token and userId:", token?.substring(0, 10) + "...", userId);
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
     setIsAuthenticated(true);
-    setUser({ id: userId });
+    
+    // Fetch user profile data after login
+    await fetchUserProfile(userId);
   };
 
   const logout = () => {
@@ -91,7 +133,9 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     user,
     login,
-    logout
+    logout,
+    updateUserProfile,
+    refreshUserProfile: () => fetchUserProfile(user?.id)
   };
 
   return (

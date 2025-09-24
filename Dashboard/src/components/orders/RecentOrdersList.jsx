@@ -1,65 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import orderService from '../../services/orderService';
+import React, { useEffect } from 'react';
+import { useTrading } from '../../context/tradingHooks.js';
 import { useAuth } from '../../context/AuthContext';
 
 const RecentOrdersList = ({ refreshTrigger }) => {
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { recentOrders: rawOrders, loading, errors, refreshAllData } = useTrading();
   const { isAuthenticated } = useAuth();
+  
+  const isLoading = loading.orders;
+  const error = errors.orders;
 
-  // Function to fetch orders from the backend
-  const fetchOrders = async () => {
-    if (!isAuthenticated) {
-      setRecentOrders([]);
-      setIsLoading(false);
-      return;
-    }
+  // Transform backend orders to frontend format
+  const recentOrders = rawOrders.map(order => ({
+    id: order._id || order.id,
+    stock: order.stock,
+    type: order.type,
+    quantity: order.quantity,
+    price: order.price,
+    orderType: order.orderType === 'market' ? 'Market' : 
+               order.orderType === 'limit' ? 'Limit' : 'Stop Loss',
+    status: order.status || 'Pending',
+    time: order.createdAt || order.time
+  }));
 
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      const response = await orderService.getUserOrders(1, 5); // Get latest 5 orders
-      
-      if (response.success) {
-        // Transform backend data to match the expected frontend format
-        const transformedOrders = response.orders.map(order => ({
-          id: order._id,
-          stock: order.stock,
-          type: order.type,
-          quantity: order.quantity,
-          price: order.price,
-          orderType: order.orderType === 'market' ? 'Market' : 
-                     order.orderType === 'limit' ? 'Limit' : 'Stop Loss',
-          status: order.status,
-          time: order.createdAt
-        }));
-        
-        setRecentOrders(transformedOrders);
-      } else {
-        throw new Error(response.message || 'Failed to fetch orders');
-      }
-    } catch (err) {
-      console.error('Error fetching orders:', err);
-      setError(err.message || 'Failed to load recent orders');
-      setRecentOrders([]);
-    } finally {
-      setIsLoading(false);
+  // Function to manually refresh data
+  const handleRefresh = () => {
+    if (refreshAllData) {
+      refreshAllData();
     }
   };
 
-  // Fetch orders on component mount and when auth status changes
+  // No need to fetch data manually - the TradingContext handles it
+  // But we can trigger refresh when needed
   useEffect(() => {
-    fetchOrders();
-  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Refresh orders when refreshTrigger changes (after a new order is placed)
-  useEffect(() => {
+    // The context automatically loads data and subscribes to refresh events
+    // This effect is just for any additional logic when refreshTrigger changes
     if (refreshTrigger && isAuthenticated) {
-      fetchOrders();
+      // Data refresh is handled by the trading context automatically
+      console.log('Refresh trigger received - data will auto-refresh');
     }
-  }, [refreshTrigger, isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshTrigger, isAuthenticated]);
 
   const getStatusBadgeClass = (status) => {
     switch(status) {
@@ -87,7 +66,7 @@ const RecentOrdersList = ({ refreshTrigger }) => {
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-sm text-red-600">{error}</p>
           <button 
-            onClick={fetchOrders}
+            onClick={handleRefresh}
             className="mt-2 text-sm text-red-700 hover:text-red-900 underline"
           >
             Try again
@@ -179,7 +158,7 @@ const RecentOrdersList = ({ refreshTrigger }) => {
           
           <div className="mt-4">
             <button 
-              onClick={fetchOrders}
+              onClick={handleRefresh}
               className="w-full py-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none border border-blue-200 rounded-md hover:bg-blue-50"
             >
               Refresh Orders

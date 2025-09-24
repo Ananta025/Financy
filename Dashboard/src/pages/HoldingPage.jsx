@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import axios from 'axios'
+import React, { useState, useMemo } from 'react'
 import { VerticalGraph } from '../components/VerticalGraph.jsx'
 import { Box, Typography, CircularProgress, Alert } from '@mui/material'
 import { DoughnoutChart } from '../components/DoughnoutChart'
-import { holdings } from '../Data/Data' // Import the local data
+import { useTrading } from '../context/tradingHooks.js';
+import TradingService from '../services/tradingService.js';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
@@ -11,9 +11,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 export default function HoldingPage() {
-  const [allHoldings, setAllHoldings] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { holdings, loading, errors, portfolioSummary } = useTrading();
   const [searchTerm, setSearchTerm] = useState('')
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -25,39 +23,15 @@ export default function HoldingPage() {
     performance: 'all'
   })
 
-  // Sectors for filter dropdown
-  const sectors = useMemo(() => {
-    if (!allHoldings.length) return ['All'];
-    const uniqueSectors = ['All', ...new Set(allHoldings.map(stock => stock.sector || 'Undefined'))];
-    return uniqueSectors;
-  }, [allHoldings]);
+  const isLoading = loading.holdings;
+  const error = errors.holdings;
 
-  useEffect(() => {
-    setLoading(true)
-    setError(null)
-    
-    // Try to fetch from API first
-    axios.get("http://localhost:3000/allholdings")
-      .then((res) => {
-        // Add sector data if not present in API response
-        const holdingsWithSector = res.data.map((item, index) => ({
-          ...item,
-          sector: item.sector || ['Technology', 'Finance', 'Healthcare', 'Consumer', 'Energy'][index % 5]
-        }));
-        setAllHoldings(holdingsWithSector)
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.log("API Error:", err)
-        // Fallback to local data if API fails, add some sectors for the demo
-        const holdingsWithSector = holdings.map((item, index) => ({
-          ...item,
-          sector: ['Technology', 'Finance', 'Healthcare', 'Consumer', 'Energy'][index % 5]
-        }));
-        setAllHoldings(holdingsWithSector)
-        setLoading(false)
-      })
-  }, [])
+  // Sectors for filter dropdown  
+  const sectors = useMemo(() => {
+    if (!holdings.length) return ['All'];
+    const uniqueSectors = ['All', ...new Set(holdings.map(stock => stock.sector || 'Undefined'))];
+    return uniqueSectors;
+  }, [holdings]);
 
   // Sorting logic
   const requestSort = (key) => {
@@ -72,10 +46,21 @@ export default function HoldingPage() {
 
   // Apply sorting, filtering and search to holdings data
   const processedHoldings = useMemo(() => {
-    if (!allHoldings.length) return [];
+    if (!holdings.length) return [];
+    
+    // Add sector data for demo purposes since backend doesn't have it yet
+    const holdingsWithSector = holdings.map((item, index) => ({
+      ...item,
+      // Map backend properties to frontend properties
+      name: item.stock, // Use stock symbol as name
+      avg: item.averagePrice,
+      price: item.currentPrice,
+      qty: item.quantity,
+      sector: item.sector || ['Technology', 'Finance', 'Healthcare', 'Consumer', 'Energy'][index % 5]
+    }));
     
     // Filter first
-    let result = [...allHoldings];
+    let result = [...holdingsWithSector];
     
     // Apply sector filter
     if (filters.sector !== 'all') {
@@ -135,46 +120,49 @@ export default function HoldingPage() {
     }
     
     return result;
-  }, [allHoldings, sortConfig, filters, searchTerm]);
+  }, [holdings, sortConfig, filters, searchTerm]);
 
   // Calculate total portfolio values and metrics
   const portfolioMetrics = useMemo(() => {
-    if (!allHoldings.length) return {
-      totalInvested: 0,
-      currentValue: 0,
-      totalPnL: 0,
-      pnlPercent: 0,
-      dayChange: 0
+    // Use portfolio summary from trading context if available
+    if (portfolioSummary && portfolioSummary.totalHoldings > 0) {
+      return {
+        totalInvested: portfolioSummary.totalInvestedValue?.toFixed(2) || '0.00',
+        currentValue: portfolioSummary.totalCurrentValue?.toFixed(2) || '0.00',
+        totalPnL: portfolioSummary.totalPnL?.toFixed(2) || '0.00',
+        pnlPercent: portfolioSummary.totalPnLPercent?.toFixed(2) || '0.00',
+        dayChange: '0.00' // Day change calculation would need previous day data
+      };
+    }
+    
+    // Fallback calculation using processed holdings if context data not available
+    if (!processedHoldings.length) return {
+      totalInvested: '0.00',
+      currentValue: '0.00',
+      totalPnL: '0.00',
+      pnlPercent: '0.00',
+      dayChange: '0.00'
     };
     
-    const totalInvested = allHoldings.reduce((sum, stock) => sum + stock.avg * stock.qty, 0);
-    const currentValue = allHoldings.reduce((sum, stock) => sum + stock.price * stock.qty, 0);
+    const totalInvested = processedHoldings.reduce((sum, stock) => sum + stock.avg * stock.qty, 0);
+    const currentValue = processedHoldings.reduce((sum, stock) => sum + stock.price * stock.qty, 0);
     const totalPnL = currentValue - totalInvested;
-    const pnlPercent = (totalPnL / totalInvested) * 100;
-    
-    // Calculate day change if day property exists
-    const dayChange = allHoldings.reduce((sum, stock) => {
-      if (stock.day) {
-        const dayChangeValue = parseFloat(stock.day.replace(/[+%]/g, ''));
-        return sum + (isNaN(dayChangeValue) ? 0 : dayChangeValue);
-      }
-      return sum;
-    }, 0);
+    const pnlPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
     
     return {
       totalInvested: totalInvested.toFixed(2),
       currentValue: currentValue.toFixed(2),
       totalPnL: totalPnL.toFixed(2),
       pnlPercent: pnlPercent.toFixed(2),
-      dayChange: (dayChange / allHoldings.length).toFixed(2)
+      dayChange: '0.00'
     };
-  }, [allHoldings]);
+  }, [portfolioSummary, processedHoldings]);
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    if (!allHoldings.length) return null;
+    if (!processedHoldings.length) return null;
     
-    const labels = allHoldings.map((stock) => stock.name);
+    const labels = processedHoldings.map((stock) => stock.name);
     
     // Vertical chart data for stock prices
     const verticalChartData = {
@@ -182,14 +170,14 @@ export default function HoldingPage() {
       datasets: [
         {
           label: "Current Price",
-          data: allHoldings.map((stock) => stock.price),
+          data: processedHoldings.map((stock) => stock.price),
           backgroundColor: "rgba(99, 102, 241, 0.7)",
           borderColor: "rgb(99, 102, 241)",
           borderWidth: 1,
         },
         {
           label: "Average Buy Price",
-          data: allHoldings.map((stock) => stock.avg),
+          data: processedHoldings.map((stock) => stock.avg),
           backgroundColor: "rgba(251, 113, 133, 0.7)",
           borderColor: "rgb(251, 113, 133)",
           borderWidth: 1,
@@ -203,7 +191,7 @@ export default function HoldingPage() {
       datasets: [
         {
           label: 'Portfolio Allocation',
-          data: allHoldings.map((stock) => stock.price * stock.qty),
+          data: processedHoldings.map((stock) => stock.price * stock.qty),
           backgroundColor: [
             'rgba(99, 102, 241, 0.7)',
             'rgba(167, 139, 250, 0.7)',
@@ -232,7 +220,7 @@ export default function HoldingPage() {
     };
 
     // Additional doughnut chart for sector allocation
-    const sectorData = allHoldings.reduce((acc, stock) => {
+    const sectorData = processedHoldings.reduce((acc, stock) => {
       const sector = stock.sector || 'Undefined';
       const value = stock.price * stock.qty;
       
@@ -271,7 +259,7 @@ export default function HoldingPage() {
     };
     
     return { verticalChartData, doughnutData, sectorChartData };
-  }, [allHoldings]);
+  }, [processedHoldings]);
 
   // Toggle sort direction indicator
   const getSortDirectionIcon = (key) => {
@@ -288,11 +276,11 @@ export default function HoldingPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Your Holdings</h1>
         <div className="text-sm text-gray-500">
-          {!loading && `${processedHoldings.length} stocks`}
+          {!isLoading && `${processedHoldings.length} stocks`}
         </div>
       </div>
       
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <CircularProgress size={60} />
         </div>
@@ -415,14 +403,42 @@ export default function HoldingPage() {
             <div className="bg-white rounded-lg shadow p-5">
               <h3 className="text-lg font-semibold mb-4">Portfolio Allocation</h3>
               <div className="h-64 md:h-80">
-                {chartData && <DoughnoutChart data={chartData.doughnutData} />}
+                {chartData ? (
+                  <DoughnoutChart data={chartData.doughnutData} />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="text-gray-400 mb-2">
+                        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 text-sm">No holdings data available</p>
+                      <p className="text-gray-400 text-xs mt-1">Start trading to see your portfolio allocation</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
             <div className="bg-white rounded-lg shadow p-5">
               <h3 className="text-lg font-semibold mb-4">Sector Allocation</h3>
               <div className="h-64 md:h-80">
-                {chartData && <DoughnoutChart data={chartData.sectorChartData} />}
+                {chartData ? (
+                  <DoughnoutChart data={chartData.sectorChartData} />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="text-gray-400 mb-2">
+                        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15.586 13H14a1 1 0 01-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 text-sm">No sector data available</p>
+                      <p className="text-gray-400 text-xs mt-1">Diversify your portfolio across sectors</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -431,7 +447,21 @@ export default function HoldingPage() {
           <div className="bg-white rounded-lg shadow p-5 mb-6">
             <h3 className="text-lg font-semibold mb-4">Price Comparison</h3>
             <div className="h-64 md:h-80">
-              {chartData && <VerticalGraph data={chartData.verticalChartData} />}
+              {chartData ? (
+                <VerticalGraph data={chartData.verticalChartData} />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <div className="text-gray-400 mb-2">
+                      <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v6l-2-2-4 4-2-2-2 2V5z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 text-sm">No price data available</p>
+                    <p className="text-gray-400 text-xs mt-1">Buy some stocks to see price comparison charts</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
