@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../services/authService';
 import userService from '../services/userService';
+import { positionManager, holdingManager } from '../Data/Data';
 
 const AuthContext = createContext();
 
@@ -115,6 +116,11 @@ export const AuthProvider = ({ children }) => {
     console.log("Login called with token and userId:", token?.substring(0, 10) + "...", userId);
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
+    
+    // Initialize user-specific positions and holdings (starts empty for new users)
+    positionManager.initializeUser(userId);
+    holdingManager.initializeUser(userId);
+    
     setIsAuthenticated(true);
     
     // Fetch user profile data after login
@@ -123,6 +129,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     console.log("Logout called");
+    
+    // Clear user-specific position and holdings data
+    positionManager.clearUserData();
+    holdingManager.clearUserHoldings();
+    
     authService.logout();
     setIsAuthenticated(false);
     setUser(null);

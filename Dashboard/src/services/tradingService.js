@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { handleAuthFailure } from '../utils/authRedirect';
+import { holdingManager, positionManager } from '../Data/Data.js';
 
 const API_BASE_URL = 'https://financy-6bzf.onrender.com';
 
@@ -198,10 +199,40 @@ export class TradingService {
         summary: response.data.portfolioSummary // Backend returns 'portfolioSummary'
       };
     } catch (error) {
+      console.log('Backend API failed, using local holdings data');
+      
+      // Fallback to local holdings data
+      const localHoldings = holdingManager.getHoldings();
+      const summary = holdingManager.getHoldingsSummary();
+      
+      // Convert local holdings to backend-compatible format
+      const backendFormatHoldings = localHoldings.map(holding => ({
+        _id: holding.id || holding.name,
+        stock: holding.name,
+        quantity: holding.qty,
+        averagePrice: holding.avg,
+        currentPrice: holding.price,
+        investedValue: holding.avg * holding.qty,
+        currentValue: holding.price * holding.qty,
+        pnl: (holding.price - holding.avg) * holding.qty,
+        pnlPercent: parseFloat(holding.net.replace(/[+%]/g, '')),
+        dayChange: parseFloat(holding.day.replace(/[+%]/g, '')),
+        sector: holding.sector,
+        lastUpdated: holding.lastUpdated || new Date().toISOString()
+      }));
+      
       return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to fetch holdings',
-        holdings: []
+        success: true,
+        holdings: backendFormatHoldings,
+        summary: {
+          totalInvestedValue: summary.totalInvestedValue,
+          totalCurrentValue: summary.totalCurrentValue,
+          totalPnL: summary.totalPnL,
+          totalPnLPercent: summary.totalPnLPercent,
+          totalHoldings: summary.totalHoldings,
+          totalDayChange: summary.totalDayChange,
+          totalDayChangePercent: summary.totalDayChangePercent
+        }
       };
     }
   }
@@ -262,10 +293,29 @@ export class TradingService {
         positions: response.data.positions
       };
     } catch (error) {
+      console.log('Backend API failed, using local positions data');
+      
+      // Fallback to local positions data
+      const localPositions = positionManager.getPositions();
+      
+      // Convert local positions to backend-compatible format
+      const backendFormatPositions = localPositions.map(position => ({
+        _id: position.id || position.name,
+        stock: position.name,
+        quantity: position.qty,
+        averagePrice: position.avg,
+        currentPrice: position.price,
+        pnl: position.pnl,
+        pnlPercent: parseFloat(position.net.replace(/[+%]/g, '')),
+        dayChange: parseFloat(position.day.replace(/[+%]/g, '')),
+        product: position.product || 'CNC',
+        type: position.type || 'equity',
+        status: 'open'
+      }));
+      
       return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to fetch positions',
-        positions: []
+        success: true,
+        positions: backendFormatPositions
       };
     }
   }
@@ -397,6 +447,78 @@ export class TradingService {
         quotes: {}
       };
     }
+  }
+
+  // ========== PRICE UPDATE OPERATIONS (DEMO) ==========
+
+  /**
+   * Start periodic price updates (for demo purposes)
+   */
+  static startPriceUpdates() {
+    // Update prices every 30 seconds for demo
+    if (!this._priceUpdateInterval) {
+      this._priceUpdateInterval = setInterval(() => {
+        this.updateRandomPrices();
+      }, 30000);
+    }
+  }
+
+  /**
+   * Stop periodic price updates
+   */
+  static stopPriceUpdates() {
+    if (this._priceUpdateInterval) {
+      clearInterval(this._priceUpdateInterval);
+      this._priceUpdateInterval = null;
+    }
+  }
+
+  /**
+   * Update random prices for demo purposes
+   */
+  static updateRandomPrices() {
+    const priceUpdates = {};
+    const stocks = ['ONGC', 'BHARTIARTL', 'HDFCBANK', 'INFY', 'RELIANCE', 'TCS', 'WIPRO'];
+    
+    stocks.forEach(stock => {
+      // Generate random price change between -2% to +2%
+      const changePercent = (Math.random() - 0.5) * 0.04; // -0.02 to +0.02 (2%)
+      const currentPrice = this.getLastKnownPrice(stock);
+      const newPrice = currentPrice * (1 + changePercent);
+      priceUpdates[stock] = parseFloat(newPrice.toFixed(2));
+    });
+
+    // Update holdings and positions with new prices
+    holdingManager.updateHoldingPrices(priceUpdates);
+    positionManager.updatePositionPrices(priceUpdates);
+    
+    // Trigger data refresh event
+    this.triggerDataRefresh();
+  }
+
+  /**
+   * Get last known price for a stock (fallback prices)
+   */
+  static getLastKnownPrice(stock) {
+    const fallbackPrices = {
+      'ONGC': 116.8,
+      'BHARTIARTL': 541.15,
+      'HDFCBANK': 1522.35,
+      'INFY': 1555.45,
+      'RELIANCE': 2112.4,
+      'TCS': 3194.8,
+      'WIPRO': 577.75
+    };
+    
+    // Try to get current price from holdings/positions first
+    const holdings = holdingManager.getHoldings();
+    const holding = holdings.find(h => h.name === stock);
+    if (holding) {
+      return holding.price;
+    }
+    
+    // Fallback to default prices
+    return fallbackPrices[stock] || 100;
   }
 
   // ========== DATA REFRESH OPERATIONS ==========

@@ -1,27 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   FilterList as FilterListIcon
 } from '@mui/icons-material';
 import ExitPositionModal from '../components/position/ExitPositionModal';
+import { positionManager } from '../Data/Data';
+import { TradingService } from '../services/tradingService';
+import { useAuth } from '../context/AuthContext';
 
 export default function PositionPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
+  const [positions, setPositions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, user } = useAuth();
   
-  // Sample data - in a real app this would come from an API
-  const [positions, setPositions] = useState([
-    { id: 1, name: 'Reliance Industries', type: 'equity', quantity: 10, avgPrice: 2500.50, currentPrice: 2650.75, pnl: 1502.50 },
-    { id: 2, name: 'HDFC Bank', type: 'equity', quantity: 15, avgPrice: 1450.25, currentPrice: 1425.50, pnl: -371.25 },
-    { id: 3, name: 'TCS', type: 'equity', quantity: 5, avgPrice: 3200.00, currentPrice: 3350.25, pnl: 751.25 },
-    { id: 4, name: 'Nifty 50 Jun 21500 CE', type: 'fno', quantity: 25, avgPrice: 150.75, currentPrice: 185.50, pnl: 868.75 },
-    { id: 5, name: 'Infosys', type: 'intraday', quantity: 20, avgPrice: 1350.25, currentPrice: 1375.50, pnl: 505.00 },
-    { id: 6, name: 'SBI', type: 'intraday', quantity: 30, avgPrice: 550.75, currentPrice: 545.25, pnl: -165.00 },
-    { id: 7, name: 'Bajaj Finance', type: 'equity', quantity: 8, avgPrice: 5800.00, currentPrice: 6050.50, pnl: 2004.00 },
-    { id: 8, name: 'Bank Nifty Jun 46000 PE', type: 'fno', quantity: 15, avgPrice: 200.50, currentPrice: 175.25, pnl: -378.75 }
-  ]);
+  // Load positions data
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadPositions();
+    } else {
+      // Clear positions if user is not authenticated
+      setPositions([]);
+      setIsLoading(false);
+    }
+    
+    // Subscribe to data refresh events
+    const unsubscribe = TradingService.subscribeToDataRefresh(() => {
+      if (isAuthenticated && user) {
+        loadPositions();
+      }
+    });
+    
+    return unsubscribe;
+  }, [isAuthenticated, user]);
+
+  const loadPositions = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Get positions from mock data
+      const mockPositions = positionManager.getPositions();
+      
+      // Transform data to match component expectations
+      const transformedPositions = mockPositions.map(position => ({
+        id: position.id,
+        name: position.name,
+        type: position.type,
+        quantity: position.qty,
+        avgPrice: position.avg,
+        currentPrice: position.price,
+        pnl: position.pnl,
+        pnlPercent: parseFloat(position.net.replace(/[+%]/g, '')),
+        dayChange: position.day,
+        product: position.product,
+        isLoss: position.isLoss
+      }));
+      
+      setPositions(transformedPositions);
+    } catch (error) {
+      console.error('Error loading positions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Calculate summary values
   const summary = positions.reduce((acc, position) => {
@@ -46,13 +90,55 @@ export default function PositionPage() {
     setSelectedPosition(null);
   };
 
-  // Function to simulate closing a position
-  const handleExitPosition = (id, quantity) => {
-    setPositions(prevPositions => 
-      prevPositions.filter(position => position.id !== id)
-    );
-    setIsModalOpen(false);
+  // Function to exit a position
+  const handleExitPosition = (positionId, quantity) => {
+    try {
+      // Exit position using position manager
+      const success = positionManager.exitPosition(positionId, quantity);
+      
+      if (success) {
+        // Reload positions to reflect the change
+        loadPositions();
+        
+        // Dispatch refresh event for other components
+        TradingService.refreshAllData();
+      }
+      
+      setIsModalOpen(false);
+      setSelectedPosition(null);
+    } catch (error) {
+      console.error('Error exiting position:', error);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="ml-3 text-gray-600">Loading positions...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Please log in to view your positions</p>
+            <button 
+              onClick={() => window.location.href = '/login'}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
@@ -185,7 +271,7 @@ export default function PositionPage() {
                       ₹{position.pnl.toFixed(2)}
                       <br />
                       <span className="text-xs">
-                        {(((position.currentPrice - position.avgPrice) / position.avgPrice) * 100).toFixed(2)}%
+                        {position.pnlPercent >= 0 ? "+" : ""}{position.pnlPercent.toFixed(2)}%
                       </span>
                     </div>
                   </td>
@@ -235,7 +321,7 @@ export default function PositionPage() {
                 <div>
                   <p className="text-gray-500">P&L</p>
                   <p className={position.pnl >= 0 ? "text-green-600" : "text-red-600"}>
-                    ₹{position.pnl.toFixed(2)} ({(((position.currentPrice - position.avgPrice) / position.avgPrice) * 100).toFixed(2)}%)
+                    ₹{position.pnl.toFixed(2)} ({position.pnlPercent >= 0 ? "+" : ""}{position.pnlPercent.toFixed(2)}%)
                   </p>
                 </div>
               </div>

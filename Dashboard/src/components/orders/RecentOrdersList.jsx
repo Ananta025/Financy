@@ -1,44 +1,70 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTrading } from '../../context/tradingHooks.js';
 import { useAuth } from '../../context/AuthContext';
+import { positionManager } from '../../Data/Data';
+import { TradingService } from '../../services/tradingService';
 
 const RecentOrdersList = ({ refreshTrigger }) => {
   const { recentOrders: rawOrders, loading, errors, refreshAllData } = useTrading();
   const { isAuthenticated } = useAuth();
+  const [localOrders, setLocalOrders] = useState([]);
   
-  const isLoading = loading.orders;
-  const error = errors.orders;
+  const isLoading = loading?.orders || false;
+  const error = errors?.orders;
 
-  // Transform backend orders to frontend format
-  const recentOrders = rawOrders.map(order => ({
-    id: order._id || order.id,
-    stock: order.stock,
-    type: order.type,
-    quantity: order.quantity,
-    price: order.price,
-    orderType: order.orderType === 'market' ? 'Market' : 
-               order.orderType === 'limit' ? 'Limit' : 'Stop Loss',
-    status: order.status || 'Pending',
-    time: order.createdAt || order.time
-  }));
+  // Load orders from local mock data
+  useEffect(() => {
+    loadLocalOrders();
+    
+    // Subscribe to data refresh events
+    const unsubscribe = TradingService.subscribeToDataRefresh(() => {
+      loadLocalOrders();
+    });
+    
+    return unsubscribe;
+  }, [refreshTrigger]);
+
+  const loadLocalOrders = () => {
+    try {
+      const orders = positionManager.getRecentOrders(10);
+      setLocalOrders(orders);
+    } catch (error) {
+      console.error('Error loading local orders:', error);
+    }
+  };
+
+  // Use local orders as primary data source, fall back to server orders
+  const recentOrders = localOrders.length > 0 
+    ? localOrders.map(order => ({
+        id: order.id,
+        stock: order.stock,
+        type: order.type,
+        quantity: order.quantity,
+        price: order.price,
+        orderType: order.orderType === 'market' ? 'Market' : 
+                   order.orderType === 'limit' ? 'Limit' : 'Stop Loss',
+        status: order.status || 'Executed',
+        time: order.timestamp || order.time
+      }))
+    : (rawOrders || []).map(order => ({
+        id: order._id || order.id,
+        stock: order.stock,
+        type: order.type,
+        quantity: order.quantity,
+        price: order.price,
+        orderType: order.orderType === 'market' ? 'Market' : 
+                   order.orderType === 'limit' ? 'Limit' : 'Stop Loss',
+        status: order.status || 'Pending',
+        time: order.createdAt || order.time
+      }));
 
   // Function to manually refresh data
   const handleRefresh = () => {
+    loadLocalOrders();
     if (refreshAllData) {
       refreshAllData();
     }
   };
-
-  // No need to fetch data manually - the TradingContext handles it
-  // But we can trigger refresh when needed
-  useEffect(() => {
-    // The context automatically loads data and subscribes to refresh events
-    // This effect is just for any additional logic when refreshTrigger changes
-    if (refreshTrigger && isAuthenticated) {
-      // Data refresh is handled by the trading context automatically
-      console.log('Refresh trigger received - data will auto-refresh');
-    }
-  }, [refreshTrigger, isAuthenticated]);
 
   const getStatusBadgeClass = (status) => {
     switch(status) {

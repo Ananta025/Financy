@@ -1,17 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTrading } from '../../context/tradingHooks.js';
 import TradingService from '../../services/tradingService.js';
 import ExitPositionModal from '../position/ExitPositionModal';
+import { positionManager } from '../../Data/Data';
 
 const PositionsPreview = () => {
   const [showExitModal, setShowExitModal] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
+  const [positions, setPositions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const { positions, loading, errors, exitPosition } = useTrading();
+  const { errors, exitPosition } = useTrading();
   
-  const isLoading = loading.positions;
-  const error = errors.positions;
+  const error = errors?.positions;
+
+  // Load positions from mock data
+  useEffect(() => {
+    loadPositions();
+    
+    // Subscribe to data refresh events
+    const unsubscribe = TradingService.subscribeToDataRefresh(() => {
+      loadPositions();
+    });
+    
+    return unsubscribe;
+  }, []);
+
+  const loadPositions = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Get positions from mock data
+      const mockPositions = positionManager.getPositions();
+      
+      // Get only the first 3 positions for preview
+      const previewPositions = mockPositions.slice(0, 3);
+      
+      // Transform data to match component expectations
+      const transformedPositions = previewPositions.map(position => ({
+        _id: position.id,
+        stock: position.name,
+        type: position.product, // CNC, MIS, etc.
+        quantity: position.qty,
+        currentPrice: position.price,
+        pnl: position.pnl,
+        pnlPercent: parseFloat(position.net.replace(/[+%]/g, '')),
+        avgPrice: position.avg,
+        positionType: position.type, // equity, intraday, etc.
+        product: position.product,
+        isLoss: position.isLoss
+      }));
+      
+      setPositions(transformedPositions);
+    } catch (error) {
+      console.error('Error loading positions preview:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Format currency values
   const formatCurrency = (value) => {
@@ -30,13 +77,25 @@ const PositionsPreview = () => {
   
   const handleExitPosition = async (positionId, exitData) => {
     try {
-      const result = await exitPosition(positionId, exitData);
-      if (result.success) {
+      // Use local position manager for exit
+      const success = positionManager.exitPosition(positionId, exitData.quantity || exitData.exitQuantity);
+      
+      if (success) {
         console.log('Position exited successfully');
+        loadPositions(); // Reload positions
+        TradingService.refreshAllData(); // Trigger refresh for other components
         handleCloseExitModal();
-      } else {
-        console.error('Failed to exit position:', result.error);
-        // TODO: Show error notification
+      }
+      
+      // Also try server-side exit if available
+      try {
+        const result = await exitPosition(positionId, exitData);
+        if (result?.success) {
+          console.log('Server-side position exit also successful');
+        }
+      } catch (serverError) {
+        console.warn('Server-side position exit failed:', serverError);
+        // Don't fail the operation since local exit worked
       }
     } catch (err) {
       console.error('Error exiting position:', err);
