@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { handleAuthFailure } from '../utils/authRedirect';
 
 const API_BASE_URL = 'https://financy-6bzf.onrender.com';
 
@@ -30,9 +31,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token is invalid or expired
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      window.location.href = '/login';
+      handleAuthFailure('Token expired or invalid (from orderService)');
     }
     return Promise.reject(error);
   }

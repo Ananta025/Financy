@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { clearAuthData } from '../utils/authRedirect';
 
 /**
  * Service for handling authentication operations
@@ -90,8 +90,7 @@ const authService = {
    * Logout user by removing all auth data
    */
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
+    clearAuthData();
   }
 };
 

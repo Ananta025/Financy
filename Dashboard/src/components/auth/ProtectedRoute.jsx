@@ -1,13 +1,13 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { handleAuthFailure, handleSignupRedirect, isSignupFlow } from '../../utils/authRedirect';
 
 /**
  * Component that protects routes requiring authentication
- * Redirects to login if user is not authenticated
+ * Redirects to appropriate login/signup based on context
  */
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  // const location = useLocation();
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -21,27 +21,28 @@ const ProtectedRoute = () => {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Handle unauthenticated users
   if (!isAuthenticated) {
-    // Use Frontend URL from env variables or fallback to a default
-    let frontendUrl = import.meta.env.VITE_FRONTEND_URL;
+    const currentUrl = window.location.href;
     
-    // Ensure frontend URL doesn't end with a slash
-    if (frontendUrl && frontendUrl.endsWith('/')) {
-      frontendUrl = frontendUrl.slice(0, -1);
+    // Check if this is a signup flow
+    if (isSignupFlow()) {
+      console.log('Unauthorized access during signup flow, redirecting to signup');
+      handleSignupRedirect(currentUrl);
+    } else {
+      console.log('Unauthorized access, redirecting to login');
+      handleAuthFailure('Access to protected route without authentication', currentUrl);
     }
     
-    // Create full absolute URL without prepending current domain
-    // const returnTo = encodeURIComponent(window.location.href);
-    const loginUrl = `${frontendUrl}/login`;
-    
-    console.log("Redirecting to login:", loginUrl);
-    
-    // Use window.location for full URL redirect instead of Navigate
-    window.location.href = loginUrl;
-    
-    // Return null while redirecting
-    return null;
+    // Return loading while redirect happens
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-3 text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
   }
 
   // Render children routes if authenticated
