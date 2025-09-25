@@ -55,8 +55,8 @@ export const watchlist = [
     },
   ];
   
-  // Template holdings data for reference (used for demo purposes)
-  const holdingsTemplate = [
+  // holdings
+  export const holdings = [
     {
       name: "BHARTIARTL",
       qty: 2,
@@ -176,41 +176,25 @@ export const watchlist = [
     return {
       positions: [],
       orders: [],
-      holdings: [],
       lastUpdated: new Date().toISOString()
     };
   };
 
   // Get current user ID from localStorage or context
   const getCurrentUserId = () => {
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.getItem('userId') || 'anonymous';
-    }
-    return 'anonymous'; // Fallback for non-browser environments
+    return localStorage.getItem('userId') || 'anonymous';
   };
 
   // Get user-specific data from localStorage
   const getUserData = (userId) => {
     try {
-      if (typeof localStorage === 'undefined') {
-        return initializeUserData(userId);
-      }
-      
       const allUserData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
       if (!allUserData[userId]) {
         // Initialize empty data for new user
         allUserData[userId] = initializeUserData(userId);
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(allUserData));
       }
-      
-      // Ensure the data structure is complete (safety check)
-      const userData = allUserData[userId];
-      if (!userData.positions) userData.positions = [];
-      if (!userData.orders) userData.orders = [];
-      if (!userData.holdings) userData.holdings = [];
-      if (!userData.lastUpdated) userData.lastUpdated = new Date().toISOString();
-      
-      return userData;
+      return allUserData[userId];
     } catch (error) {
       console.error('Error loading user data:', error);
       return initializeUserData(userId);
@@ -220,11 +204,6 @@ export const watchlist = [
   // Save user-specific data to localStorage
   const saveUserData = (userId, userData) => {
     try {
-      if (typeof localStorage === 'undefined') {
-        console.warn('localStorage not available');
-        return;
-      }
-      
       const allUserData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
       allUserData[userId] = {
         ...userData,
@@ -242,29 +221,17 @@ export const watchlist = [
   // orders - now user-specific and starts empty for new users  
   export let orders = [];
 
-  // holdings - now user-specific and starts empty for new users
-  export let holdings = [];
-
   // Load user-specific data on initialization
   const loadUserSpecificData = () => {
     const userId = getCurrentUserId();
     const userData = getUserData(userId);
     
-    // Update global arrays with user-specific data (with safety checks)
+    // Update global arrays with user-specific data
     positions.length = 0; // Clear array
-    if (userData.positions && Array.isArray(userData.positions)) {
-      positions.push(...userData.positions);
-    }
+    positions.push(...userData.positions);
     
     orders.length = 0; // Clear array
-    if (userData.orders && Array.isArray(userData.orders)) {
-      orders.push(...userData.orders);
-    }
-    
-    holdings.length = 0; // Clear array
-    if (userData.holdings && Array.isArray(userData.holdings)) {
-      holdings.push(...userData.holdings);
-    }
+    orders.push(...userData.orders);
   };
 
   // Save current data to user-specific storage
@@ -272,8 +239,7 @@ export const watchlist = [
     const userId = getCurrentUserId();
     const userData = {
       positions: [...positions],
-      orders: [...orders],
-      holdings: [...holdings]
+      orders: [...orders]
     };
     saveUserData(userId, userData);
   };
@@ -570,299 +536,9 @@ export const watchlist = [
     }
   }
 
-  // Holdings Manager - Similar to positions but for long-term holdings
-  export const holdingManager = {
-    // Initialize user-specific holdings data
-    initializeUser: (userId) => {
-      // First, ensure user data exists with proper structure
-      const userData = getUserData(userId);
-      
-      // Then load the user-specific data
-      loadUserSpecificData();
-      
-      // Check if we need to add demo holdings
-      if (!userData.holdings || userData.holdings.length === 0) {
-        // Add some demo holdings for new users (can be customized or removed)
-        const demoHoldings = [
-          {
-            name: "ONGC",
-            qty: 1,
-            avg: 116.8,
-            price: 116.8,
-            sector: 'Energy'
-          }
-        ];
-        
-        // Add each demo holding
-        demoHoldings.forEach(holding => {
-          // Calculate derived values
-          const investedValue = holding.avg * holding.qty;
-          const currentValue = holding.price * holding.qty;
-          const pnl = currentValue - investedValue;
-          const pnlPercent = investedValue > 0 ? ((pnl / investedValue) * 100) : 0;
-          
-          const fullHolding = {
-            id: Date.now() + Math.random(),
-            name: holding.name,
-            qty: holding.qty,
-            avg: holding.avg,
-            price: holding.price,
-            sector: holding.sector,
-            net: (pnlPercent >= 0 ? "+" : "") + pnlPercent.toFixed(2) + "%",
-            day: generateTodaysChange(),
-            isLoss: pnl < 0,
-            addedDate: new Date().toISOString(),
-            lastUpdated: new Date().toISOString()
-          };
-          
-          holdings.push(fullHolding);
-        });
-        
-        saveCurrentUserData();
-      }
-    },
-
-    // Get all holdings for current user
-    getHoldings: () => {
-      loadUserSpecificData();
-      return [...holdings]; // Return copy to prevent mutations
-    },
-
-    // Add a new holding (when stocks are bought and held long-term)
-    addHolding: (holdingData) => {
-      loadUserSpecificData();
-      
-      const holding = {
-        id: Date.now(),
-        name: holdingData.stock || holdingData.name,
-        qty: parseInt(holdingData.quantity) || parseInt(holdingData.qty),
-        avg: parseFloat(holdingData.averagePrice) || parseFloat(holdingData.avg) || parseFloat(holdingData.price),
-        price: parseFloat(holdingData.currentPrice) || parseFloat(holdingData.price),
-        sector: holdingData.sector || getSectorForStock(holdingData.stock || holdingData.name),
-        addedDate: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
-      };
-
-      // Calculate derived values
-      const investedValue = holding.avg * holding.qty;
-      const currentValue = holding.price * holding.qty;
-      const pnl = currentValue - investedValue;
-      const pnlPercent = investedValue > 0 ? ((pnl / investedValue) * 100) : 0;
-      
-      // Add calculated fields
-      holding.net = (pnlPercent >= 0 ? "+" : "") + pnlPercent.toFixed(2) + "%";
-      holding.day = generateTodaysChange(); // Random day change for demo
-      holding.isLoss = pnl < 0;
-
-      // Check if holding already exists, if so, average the price
-      const existingIndex = holdings.findIndex(h => h.name === holding.name);
-      if (existingIndex !== -1) {
-        const existing = holdings[existingIndex];
-        const totalQty = existing.qty + holding.qty;
-        const totalInvested = (existing.avg * existing.qty) + (holding.avg * holding.qty);
-        
-        holdings[existingIndex] = {
-          ...existing,
-          qty: totalQty,
-          avg: totalInvested / totalQty,
-          price: holding.price, // Use latest price
-          lastUpdated: holding.lastUpdated
-        };
-
-        // Recalculate derived values for updated holding
-        const updatedHolding = holdings[existingIndex];
-        const updatedInvested = updatedHolding.avg * updatedHolding.qty;
-        const updatedCurrent = updatedHolding.price * updatedHolding.qty;
-        const updatedPnl = updatedCurrent - updatedInvested;
-        const updatedPnlPercent = updatedInvested > 0 ? ((updatedPnl / updatedInvested) * 100) : 0;
-        
-        updatedHolding.net = (updatedPnlPercent >= 0 ? "+" : "") + updatedPnlPercent.toFixed(2) + "%";
-        updatedHolding.day = generateTodaysChange();
-        updatedHolding.isLoss = updatedPnl < 0;
-      } else {
-        holdings.push(holding);
-      }
-      
-      saveCurrentUserData();
-      return true;
-    },
-
-    // Update holding prices (for real-time price updates)
-    updateHoldingPrices: (priceUpdates) => {
-      loadUserSpecificData();
-      
-      holdings.forEach(holding => {
-        if (priceUpdates[holding.name]) {
-          const oldPrice = holding.price;
-          const newPrice = parseFloat(priceUpdates[holding.name]);
-          
-          holding.price = newPrice;
-          holding.lastUpdated = new Date().toISOString();
-          
-          // Recalculate derived values
-          const investedValue = holding.avg * holding.qty;
-          const currentValue = holding.price * holding.qty;
-          const pnl = currentValue - investedValue;
-          const pnlPercent = investedValue > 0 ? ((pnl / investedValue) * 100) : 0;
-          
-          holding.net = (pnlPercent >= 0 ? "+" : "") + pnlPercent.toFixed(2) + "%";
-          
-          // Calculate day change based on price difference
-          const dayChange = oldPrice > 0 ? (((newPrice - oldPrice) / oldPrice) * 100) : 0;
-          holding.day = (dayChange >= 0 ? "+" : "") + dayChange.toFixed(2) + "%";
-          holding.isLoss = pnl < 0;
-        }
-      });
-      
-      saveCurrentUserData();
-    },
-
-    // Remove holding (when fully sold)
-    removeHolding: (holdingName) => {
-      loadUserSpecificData();
-      const index = holdings.findIndex(h => h.name === holdingName);
-      if (index !== -1) {
-        holdings.splice(index, 1);
-        saveCurrentUserData();
-        return true;
-      }
-      return false;
-    },
-
-    // Reduce holding quantity (when partially sold)
-    reduceHolding: (holdingName, quantityToSell) => {
-      loadUserSpecificData();
-      const holding = holdings.find(h => h.name === holdingName);
-      
-      if (holding && holding.qty >= quantityToSell) {
-        if (holding.qty === quantityToSell) {
-          // Full sale - remove holding
-          return holdingManager.removeHolding(holdingName);
-        } else {
-          // Partial sale - reduce quantity
-          holding.qty -= quantityToSell;
-          holding.lastUpdated = new Date().toISOString();
-          
-          // Recalculate derived values
-          const investedValue = holding.avg * holding.qty;
-          const currentValue = holding.price * holding.qty;
-          const pnl = currentValue - investedValue;
-          const pnlPercent = investedValue > 0 ? ((pnl / investedValue) * 100) : 0;
-          
-          holding.net = (pnlPercent >= 0 ? "+" : "") + pnlPercent.toFixed(2) + "%";
-          holding.day = generateTodaysChange();
-          holding.isLoss = pnl < 0;
-          
-          saveCurrentUserData();
-          return true;
-        }
-      }
-      return false;
-    },
-
-    // Get holdings summary/portfolio stats
-    getHoldingsSummary: () => {
-      loadUserSpecificData();
-      
-      const summary = holdings.reduce((acc, holding) => {
-        const investedValue = holding.avg * holding.qty;
-        const currentValue = holding.price * holding.qty;
-        const pnl = currentValue - investedValue;
-        
-        acc.totalInvestedValue += investedValue;
-        acc.totalCurrentValue += currentValue;
-        acc.totalPnL += pnl;
-        acc.totalHoldings += 1;
-        
-        if (pnl > 0) acc.profitableHoldings += 1;
-        
-        // Parse day change for today's total change calculation
-        const dayChangeStr = holding.day.replace(/[+%]/g, '');
-        const dayChangePercent = parseFloat(dayChangeStr) || 0;
-        const dayChangeValue = (dayChangePercent / 100) * currentValue;
-        acc.totalDayChange += dayChangeValue;
-        
-        return acc;
-      }, {
-        totalInvestedValue: 0,
-        totalCurrentValue: 0,
-        totalPnL: 0,
-        totalDayChange: 0,
-        totalHoldings: 0,
-        profitableHoldings: 0
-      });
-
-      // Calculate percentages
-      summary.totalPnLPercent = summary.totalInvestedValue > 0 
-        ? (summary.totalPnL / summary.totalInvestedValue) * 100 
-        : 0;
-      
-      summary.totalDayChangePercent = summary.totalCurrentValue > 0
-        ? (summary.totalDayChange / summary.totalCurrentValue) * 100
-        : 0;
-
-      return summary;
-    },
-
-    // Clear all holdings for current user
-    clearUserHoldings: () => {
-      holdings.length = 0;
-      saveCurrentUserData();
-    },
-
-    // Get user info
-    getHoldingsInfo: () => {
-      const userId = getCurrentUserId();
-      return {
-        userId,
-        holdingsCount: holdings.length,
-        lastUpdated: getUserData(userId).lastUpdated
-      };
-    }
-  };
-
-  // Helper function to generate random today's change for demo
-  function generateTodaysChange() {
-    const changePercent = (Math.random() - 0.5) * 6; // Random between -3% to +3%
-    return (changePercent >= 0 ? "+" : "") + changePercent.toFixed(2) + "%";
-  }
-
-  // Helper function to get sector for a stock (demo purposes)
-  function getSectorForStock(stockName) {
-    const sectors = {
-      'BHARTIARTL': 'Telecommunications',
-      'HDFCBANK': 'Banking',
-      'HINDUNILVR': 'FMCG',
-      'INFY': 'Technology',
-      'ITC': 'FMCG',
-      'KPITTECH': 'Technology',
-      'M&M': 'Automobile',
-      'RELIANCE': 'Energy',
-      'SBIN': 'Banking',
-      'SGBMAY29': 'Government Securities',
-      'TATAPOWER': 'Power',
-      'ONGC': 'Energy',
-      'TCS': 'Technology',
-      'WIPRO': 'Technology',
-      'HUL': 'FMCG'
-    };
-    return sectors[stockName] || 'Others';
-  }
-
   // Initialize user data when the module loads
-  // This ensures both positions and holdings start empty for new users
+  // This ensures positions start empty for new users
   const currentUserId = getCurrentUserId();
-  if (currentUserId && currentUserId !== 'anonymous' && typeof localStorage !== 'undefined') {
-    try {
-      positionManager.initializeUser(currentUserId);
-      holdingManager.initializeUser(currentUserId);
-    } catch (error) {
-      console.error('Error initializing user data:', error);
-      // Reset localStorage if corrupted
-      try {
-        localStorage.removeItem(USER_DATA_KEY);
-      } catch (storageError) {
-        console.error('Could not clear localStorage:', storageError);
-      }
-    }
+  if (currentUserId && currentUserId !== 'anonymous') {
+    positionManager.initializeUser(currentUserId);
   }

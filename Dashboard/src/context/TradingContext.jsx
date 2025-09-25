@@ -269,14 +269,7 @@ export function TradingProvider({ children }) {
       loadData();
     });
 
-    // Start periodic price updates for demo
-    TradingService.startPriceUpdates();
-
-    return () => {
-      unsubscribe();
-      // Stop price updates on cleanup
-      TradingService.stopPriceUpdates();
-    };
+    return unsubscribe;
   }, []);
 
   // Load initial data

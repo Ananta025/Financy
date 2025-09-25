@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../services/authService';
 import userService from '../services/userService';
-import { positionManager, holdingManager } from '../Data/Data';
+import { positionManager } from '../Data/Data';
 
 const AuthContext = createContext();
 
@@ -117,9 +117,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
     
-    // Initialize user-specific positions and holdings (starts empty for new users)
+    // Initialize user-specific positions (starts empty for new users)
     positionManager.initializeUser(userId);
-    holdingManager.initializeUser(userId);
     
     setIsAuthenticated(true);
     
@@ -130,9 +129,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     console.log("Logout called");
     
-    // Clear user-specific position and holdings data
+    // Clear user-specific position data
     positionManager.clearUserData();
-    holdingManager.clearUserHoldings();
     
     authService.logout();
     setIsAuthenticated(false);
