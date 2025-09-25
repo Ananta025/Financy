@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
  */
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const location = useLocation();
+  // const location = useLocation();
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -32,8 +32,8 @@ const ProtectedRoute = () => {
     }
     
     // Create full absolute URL without prepending current domain
-    const returnTo = encodeURIComponent(window.location.href);
-    const loginUrl = `${frontendUrl}/login?returnTo=${returnTo}`;
+    // const returnTo = encodeURIComponent(window.location.href);
+    const loginUrl = `${frontendUrl}/login`;
     
     console.log("Redirecting to login:", loginUrl);
     
