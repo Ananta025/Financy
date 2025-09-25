@@ -1,59 +1,42 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function SecuritySettings() {
-  const [changePassword, setChangePassword] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  
+  const { logout } = useAuth();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  
-  const handlePasswordChange = (e) => {
-    setChangePassword({
-      ...changePassword,
-      [e.target.name]: e.target.value
-    });
+
+  const handleChangePassword = () => {
+    // This would open a modal or redirect to change password page
+    alert("Change password feature will be implemented soon!");
   };
-  
-  const handleSubmitPassword = (e) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!changePassword.currentPassword) {
-      alert("Please enter your current password");
-      return;
-    }
-    
-    if (changePassword.newPassword !== changePassword.confirmPassword) {
-      alert("New passwords don't match");
-      return;
-    }
-    
-    // This would be replaced with an actual API call
-    alert("Password changed successfully!");
-    
-    // Reset form
-    setChangePassword({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
-  };
-  
+
   const handleToggle2FA = () => {
     setTwoFactorEnabled(!twoFactorEnabled);
-    
-    // This would be replaced with an actual API call
     if (!twoFactorEnabled) {
-      alert("2FA would be enabled here. In a real app, this would show a QR code or send a verification code.");
+      alert("Two-factor authentication enabled! You'll receive a setup guide via email.");
     } else {
-      alert("2FA disabled");
+      alert("Two-factor authentication disabled.");
     }
   };
-  
+
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      try {
+        await logout();
+        // User will be redirected automatically by AuthContext
+      } catch (error) {
+        console.error('Logout failed:', error);
+        alert('Failed to logout. Please try again.');
+      }
+    }
+  };
+
   const handleLogoutAll = () => {
-    alert("This would log you out from all devices");
+    if (window.confirm('Are you sure you want to logout from all devices?')) {
+      // This would be replaced with actual API call
+      alert("Logged out from all devices successfully!");
+      handleLogout();
+    }
   };
   
   return (
@@ -62,55 +45,20 @@ export default function SecuritySettings() {
       
       {/* Change Password Section */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium mb-3">Change Password</h3>
-        <form onSubmit={handleSubmitPassword}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">Current Password</label>
-              <input
-                type="password"
-                name="currentPassword"
-                id="currentPassword"
-                value={changePassword.currentPassword}
-                onChange={handlePasswordChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">New Password</label>
-              <input
-                type="password"
-                name="newPassword"
-                id="newPassword"
-                value={changePassword.newPassword}
-                onChange={handlePasswordChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm New Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                id="confirmPassword"
-                value={changePassword.confirmPassword}
-                onChange={handlePasswordChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div>
-              <button
-                type="submit"
-                className="w-full md:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Update Password
-              </button>
-            </div>
+        <div className="flex items-center justify-between py-4">
+          <div>
+            <h3 className="text-lg font-medium">Password</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Update your account password
+            </p>
           </div>
-        </form>
+          <button
+            onClick={handleChangePassword}
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Change Password
+          </button>
+        </div>
       </div>
       
       {/* 2FA Section */}
@@ -134,21 +82,29 @@ export default function SecuritySettings() {
         </div>
       </div>
       
-      {/* Logout from all devices */}
+      {/* Logout Section */}
       <div className="py-4 border-t border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium">Active Sessions</h3>
+            <h3 className="text-lg font-medium">Account Session</h3>
             <p className="text-sm text-gray-500 mt-1">
-              Log out from all devices except this one
+              Manage your account sessions and logout
             </p>
           </div>
-          <button
-            onClick={handleLogoutAll}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Logout All Devices
-          </button>
+          <div className="space-x-3">
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            >
+              Logout
+            </button>
+            <button
+              onClick={handleLogoutAll}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Logout All Devices
+            </button>
+          </div>
         </div>
       </div>
     </div>

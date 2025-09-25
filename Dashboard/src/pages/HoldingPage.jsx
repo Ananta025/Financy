@@ -409,12 +409,12 @@ export default function HoldingPage() {
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
                       <div className="text-gray-400 mb-2">
-                        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <p className="text-gray-500 text-sm">No holdings data available</p>
-                      <p className="text-gray-400 text-xs mt-1">Start trading to see your portfolio allocation</p>
+                      <p className="text-gray-500 text-base">No holdings data available</p>
+                      <p className="text-gray-400 text-sm mt-1">Start trading to see your portfolio allocation</p>
                     </div>
                   </div>
                 )}
@@ -430,12 +430,12 @@ export default function HoldingPage() {
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
                       <div className="text-gray-400 mb-2">
-                        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15.586 13H14a1 1 0 01-1-1z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <p className="text-gray-500 text-sm">No sector data available</p>
-                      <p className="text-gray-400 text-xs mt-1">Diversify your portfolio across sectors</p>
+                      <p className="text-gray-500 text-base">No sector data available</p>
+                      <p className="text-gray-400 text-sm mt-1">Diversify your portfolio across sectors</p>
                     </div>
                   </div>
                 )}
@@ -453,12 +453,12 @@ export default function HoldingPage() {
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     <div className="text-gray-400 mb-2">
-                      <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v6l-2-2-4 4-2-2-2 2V5z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <p className="text-gray-500 text-sm">No price data available</p>
-                    <p className="text-gray-400 text-xs mt-1">Buy some stocks to see price comparison charts</p>
+                    <p className="text-gray-500 text-base">No price data available</p>
+                    <p className="text-gray-400 text-sm mt-1">Buy some stocks to see price comparison charts</p>
                   </div>
                 </div>
               )}

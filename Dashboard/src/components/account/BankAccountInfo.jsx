@@ -4,12 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function BankAccountInfo() {
   const { user } = useAuth();
   const [isAddingAccount, setIsAddingAccount] = useState(false);
-  const [bankAccount, setBankAccount] = useState({
-    accountNumber: '********7890',
-    ifscCode: 'SBIN0001234',
-    accountHolder: user?.name || 'Account Holder',
-    bankName: 'State Bank of India'
-  });
+  const [bankAccount, setBankAccount] = useState(null);
   
   const [formData, setFormData] = useState({
     accountNumber: '',
@@ -18,13 +13,17 @@ export default function BankAccountInfo() {
     bankName: ''
   });
 
+  // Load user's bank account info when component mounts
+  useEffect(() => {
+    const savedBankAccount = localStorage.getItem(`bankAccount_${user?.id}`);
+    if (savedBankAccount) {
+      setBankAccount(JSON.parse(savedBankAccount));
+    }
+  }, [user?.id]);
+
   // Update account holder name when user data changes
   useEffect(() => {
     if (user?.name) {
-      setBankAccount(prev => ({
-        ...prev,
-        accountHolder: user.name
-      }));
       setFormData(prev => ({
         ...prev,
         accountHolder: user.name
@@ -60,12 +59,17 @@ export default function BankAccountInfo() {
       (_, first, middle, last) => first + '*'.repeat(middle.length) + last
     );
     
-    setBankAccount({
+    const newBankAccount = {
       accountNumber: maskedNumber.length > 8 ? maskedNumber : '********' + formData.accountNumber.slice(-4),
       ifscCode: formData.ifscCode,
       accountHolder: formData.accountHolder,
       bankName: formData.bankName
-    });
+    };
+    
+    setBankAccount(newBankAccount);
+    
+    // Save to localStorage
+    localStorage.setItem(`bankAccount_${user?.id}`, JSON.stringify(newBankAccount));
     
     setIsAddingAccount(false);
     
@@ -73,7 +77,7 @@ export default function BankAccountInfo() {
     setFormData({
       accountNumber: '',
       ifscCode: '',
-      accountHolder: '',
+      accountHolder: user?.name || '',
       bankName: ''
     });
   };
@@ -87,7 +91,7 @@ export default function BankAccountInfo() {
             onClick={handleAddAccount}
             className="text-sm px-3 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"
           >
-            {bankAccount.accountNumber ? 'Change Account' : 'Add Account'}
+            {bankAccount ? 'Change Account' : 'Add Account'}
           </button>
         )}
       </div>
@@ -160,7 +164,7 @@ export default function BankAccountInfo() {
             </button>
           </div>
         </div>
-      ) : bankAccount.accountNumber ? (
+      ) : bankAccount ? (
         <div className="space-y-4 bg-gray-50 rounded-lg p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

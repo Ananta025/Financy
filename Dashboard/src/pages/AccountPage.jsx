@@ -6,6 +6,7 @@ import SecuritySettings from '../components/account/SecuritySettings'
 import PreferencesSection from '../components/account/PreferencesSection'
 import DocumentsSection from '../components/account/DocumentsSection'
 import SupportSection from '../components/account/SupportSection'
+import Wallet from '../components/account/Wallet'
 
 export default function AccountPage() {
   return (
@@ -21,6 +22,7 @@ export default function AccountPage() {
         
         {/* Right Column */}
         <div className="space-y-6 md:space-y-8">
+          <Wallet />
           <SecuritySettings />
           <PreferencesSection />
         </div>

@@ -346,6 +346,9 @@ export const watchlist = [
       // Update positions based on the order
       updatePositionsFromOrder(newOrder);
       
+      // Update wallet for the trade
+      walletManager.updateWalletForTrade(userId, newOrder);
+      
       // Save to user-specific storage
       saveCurrentUserData();
       
@@ -542,3 +545,45 @@ export const watchlist = [
   if (currentUserId && currentUserId !== 'anonymous') {
     positionManager.initializeUser(currentUserId);
   }
+
+  // Wallet management functions
+  export const walletManager = {
+    // Update wallet balance when trades are executed
+    updateWalletForTrade: (userId, order) => {
+      try {
+        const walletData = JSON.parse(localStorage.getItem(`walletData_${userId}`)) || {
+          balance: 0,
+          currency: 'INR',
+          transactions: []
+        };
+
+        const tradeAmount = order.price * order.quantity;
+        const newTransaction = {
+          id: Date.now(),
+          type: order.type === 'Buy' ? 'debit' : 'credit',
+          amount: tradeAmount,
+          description: `${order.type} ${order.quantity} ${order.stock}`,
+          date: new Date().toISOString(),
+          status: 'completed'
+        };
+
+        // Update balance
+        if (order.type === 'Buy') {
+          walletData.balance = Math.max(0, walletData.balance - tradeAmount);
+        } else {
+          walletData.balance += tradeAmount;
+        }
+
+        // Add transaction to history (keep last 10)
+        walletData.transactions = [newTransaction, ...walletData.transactions.slice(0, 9)];
+        
+        // Save updated wallet data
+        localStorage.setItem(`walletData_${userId}`, JSON.stringify(walletData));
+        
+        return walletData;
+      } catch (error) {
+        console.error('Error updating wallet for trade:', error);
+        return null;
+      }
+    }
+  };

@@ -66,7 +66,7 @@ export default function Navbar() {
                     </Link>
                     <Link 
                         to="/holdings" 
-                        className={`text-decoration-none transition-all duration-200 py-2 rounded-lg px-3 ${getActiveLinkClass("/holding")}`}
+                        className={`text-decoration-none transition-all duration-200 py-2 rounded-lg px-3 ${getActiveLinkClass("/holdings")}`}
                     >
                         Holdings
                     </Link>
@@ -137,9 +137,9 @@ export default function Navbar() {
                         Orders
                     </Link>
                     <Link 
-                        to="/holding" 
+                        to="/holdings" 
                         onClick={toggleMenu} 
-                        className={`py-3 px-3 rounded-lg mb-1 transition-all duration-200 ${getActiveLinkClass("/holding")}`}
+                        className={`py-3 px-3 rounded-lg mb-1 transition-all duration-200 ${getActiveLinkClass("/holdings")}`}
                     >
                         Holdings
                     </Link>
