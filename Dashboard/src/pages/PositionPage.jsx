@@ -113,7 +113,7 @@ export default function PositionPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
           <span className="ml-3 text-gray-600">Loading positions...</span>
@@ -124,7 +124,7 @@ export default function PositionPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Please log in to view your positions</p>
@@ -141,7 +141,7 @@ export default function PositionPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:px-2 md:px-8 lg:px-28 xl:px-32">
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
       {/* Summary Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">

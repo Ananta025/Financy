@@ -101,7 +101,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:px-6 md:px-8 lg:px-22 xl:px-26">
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-semibold mb-6">Stock Trading</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

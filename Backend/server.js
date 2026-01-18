@@ -3,8 +3,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 
 import mongoose from 'mongoose';
+import { apiLimiter } from './middleware/rateLimiter.js';
+import { enforceHTTPS, securityHeaders } from './middleware/security.js';
 // Import all models to ensure they are registered with mongoose
 import User from './models/userModel.js';
 import Order from './models/orderModel.js';
@@ -25,17 +29,88 @@ import positionRoutes from './routes/positionRoutes.js';
 
 const app = express();
 
+// SECURITY: Enforce HTTPS in production
+app.use(enforceHTTPS);
 
-app.use(cors());
-app.use(bodyParser.json());
+// SECURITY: Set security headers
+app.use(securityHeaders);
+
+// SECURITY: Configure CORS to only allow trusted origins
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  process.env.DASHBOARD_URL || 'http://localhost:5174',
+  'https://financy-zeta.vercel.app',
+  'https://financy-dashboard-tawny.vercel.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true, // Allow cookies/auth headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(bodyParser.json({ limit: '10mb' })); // SECURITY: Limit payload size
+
+// SECURITY: Helmet adds various HTTP headers for security
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for API
+  crossOriginEmbedderPolicy: false
+}));
+
+// SECURITY: Sanitize data to prevent NoSQL injection
+app.use(mongoSanitize({
+  replaceWith: '_',
+  onSanitize: ({ req, key }) => {
+    console.warn(`Sanitized request on key: ${key}`);
+  }
+}));
+
+// SECURITY: Apply general rate limiting to all routes
+app.use(apiLimiter);
 
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const mongo_url = process.env.MONGO_URL;
-mongoose.connect(mongo_url).then(() => {
-    console.log('Connected to MongoDB');
+
+if (!mongo_url) {
+  console.error('FATAL ERROR: MONGO_URL is not defined in environment variables');
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'secret') {
+  console.error('FATAL ERROR: JWT_SECRET is not defined or using default value');
+  process.exit(1);
+}
+
+mongoose.connect(mongo_url, {
+  // SECURITY: Connection options
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+}).then(() => {
+    console.log('✅ Connected to MongoDB');
 }).catch((error) => {
-    console.log(error);
+    console.error('❌ MongoDB connection error:', error.message);
+    process.exit(1);
+});
+
+// Handle connection errors after initial connection
+mongoose.connection.on('error', (error) => {
+  console.error('MongoDB connection error:', error);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected. Attempting to reconnect...');
 });
 
 app.use('/users', userRoutes);

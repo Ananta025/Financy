@@ -49,6 +49,27 @@ export const createOrder = async (req, res) => {
             total
         } = req.body;
 
+        // SECURITY: Runtime validation (defense in depth)
+        if (!stock || typeof stock !== 'string' || stock.trim().length === 0) {
+            throw new Error('Validation failed: Invalid stock symbol');
+        }
+        
+        if (!['Buy', 'Sell'].includes(type)) {
+            throw new Error('Validation failed: Invalid order type');
+        }
+        
+        if (!Number.isInteger(quantity) || quantity < 1) {
+            throw new Error('Validation failed: Quantity must be a positive integer');
+        }
+        
+        if (typeof price !== 'number' || price <= 0) {
+            throw new Error('Validation failed: Price must be greater than 0');
+        }
+        
+        if (typeof total !== 'number' || total <= 0) {
+            throw new Error('Validation failed: Total must be greater than 0');
+        }
+
         console.log('Creating order with data:', { userId, stock, type, quantity, price, total });
 
         // Create new order

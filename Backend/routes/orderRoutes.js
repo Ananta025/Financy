@@ -8,14 +8,15 @@ import {
 } from '../controllers/orderController.js';
 import { validateOrder } from '../middleware/validators.js';
 import auth from '../middleware/auth.js';
+import { orderLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 // All order routes require authentication
 router.use(auth);
 
-// Create a new order
-router.post('/create', validateOrder, createOrder);
+// SECURITY: Rate limit order creation to prevent spam
+router.post('/create', orderLimiter, validateOrder, createOrder);
 
 // Get user's orders with pagination
 router.get('/', getUserOrders);

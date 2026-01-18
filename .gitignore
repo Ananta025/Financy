@@ -1,2 +1,10 @@
 .env
+.env.local
+.env.*.local
 node_modules/
+*.log
+
+# Security: Never commit sensitive files
+Backend/.env
+Frontend/.env
+Dashboard/.env

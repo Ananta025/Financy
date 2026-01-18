@@ -1,4 +1,3 @@
-// import User from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { MongoClient, ObjectId } from 'mongodb';
@@ -55,17 +54,37 @@ export const signIn = async (req, res) => {
         return res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    
+    // SECURITY: Ensure inputs are strings (prevent NoSQL injection)
+    if (typeof email !== 'string' || typeof password !== 'string') {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            success: false,
+            message: 'Invalid input types'
+        });
+    }
+    
+    email = email.trim();
+    
     try{
         await connectClient();
         const db = client.db("financy");
+        
+        // SECURITY: Query is now safe - express-mongo-sanitize strips $ operators
         const user = await db.collection("users").findOne({ email });
+        
         if(!user){
-            return res.status(httpStatus.NOT_FOUND).send("User not found");
+            return res.status(httpStatus.NOT_FOUND).json({
+                success: false,
+                message: 'Invalid credentials'  // Don't reveal if user exists
+            });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if(!isPasswordValid){
-            return res.status(httpStatus.UNAUTHORIZED).send("Invalid credentials");
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                success: false,
+                message: 'Invalid credentials'  // Same error as above
+            });
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
         return res.status(httpStatus.OK).json({ token, userId: user._id });
@@ -76,11 +95,20 @@ export const signIn = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
+    // SECURITY: This endpoint should be admin-only or removed
+    // For now, adding auth middleware and removing sensitive data
     try{
         await connectClient();
         const db = client.db("financy");
         const users = await db.collection("users").find({}).toArray();
-        return res.status(httpStatus.OK).json(users);
+        
+        // SECURITY: Never expose password hashes
+        const sanitizedUsers = users.map(user => {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+        
+        return res.status(httpStatus.OK).json(sanitizedUsers);
     }catch(err){
         console.error("Error during fatching users",err)
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Internal Server Error");
@@ -89,6 +117,15 @@ const getAllUsers = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
     const userId = req.params.id;
+    
+    // SECURITY: Verify user can only access their own profile
+    if (userId !== req.user.userId.toString()) {
+        return res.status(httpStatus.FORBIDDEN).json({
+            success: false,
+            message: 'Access denied. You can only view your own profile.'
+        });
+    }
+    
     try{
         await connectClient();
         const db = client.db("financy");
@@ -98,7 +135,11 @@ const getUserProfile = async (req, res) => {
         if(!user){
             return res.status(httpStatus.NOT_FOUND).send("User not found!");
         }
-        return res.status(httpStatus.OK).json(user);
+        
+        // SECURITY: Never return password hash
+        const { password, ...userWithoutPassword } = user;
+        
+        return res.status(httpStatus.OK).json(userWithoutPassword);
     }catch(err){
         console.error("Error during fetching user profile",err);
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Internal Server Error");
@@ -109,6 +150,15 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
     const userId = req.params.id;
     const { name, email, password } = req.body;
+    
+    // SECURITY: Verify user can only update their own profile
+    if (userId !== req.user.userId.toString()) {
+        return res.status(httpStatus.FORBIDDEN).json({
+            success: false,
+            message: 'Access denied. You can only update your own profile.'
+        });
+    }
+    
     try{
         await connectClient();
         const db = client.db("financy");
@@ -120,18 +170,47 @@ const updateUserProfile = async (req, res) => {
         }
         
         // Prepare update object
-        const updateData = { name, email };
+        const updateData = {};
         
-        // Only hash and update password if it's provided
-        if (password) {
+        // SECURITY: Validate and sanitize each field
+        if (name && name.trim().length > 0) {
+            updateData.name = name.trim();
+        }
+        
+        if (email && email.trim().length > 0) {
+            // Check if new email already exists
+            const existingUser = await db.collection("users").findOne({ 
+                email: email.trim(),
+                _id: { $ne: new ObjectId(userId) }
+            });
+            if (existingUser) {
+                return res.status(httpStatus.BAD_REQUEST).json({
+                    success: false,
+                    message: 'Email already in use'
+                });
+            }
+            updateData.email = email.trim();
+        }
+        
+        if (password && password.length > 0) {
             const hashedPassword = await bcrypt.hash(password, 10);
             updateData.password = hashedPassword;
+        }
+        
+        if (Object.keys(updateData).length === 0) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                success: false,
+                message: 'No valid fields to update'
+            });
         }
         
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, {
             $set: updateData
         });
-        return res.status(httpStatus.OK).send("User Profile Updated");
+        return res.status(httpStatus.OK).json({
+            success: true,
+            message: 'User Profile Updated'
+        });
     }catch(err){
         console.error("Error during updating user profile",err);
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Internal Server Error");
