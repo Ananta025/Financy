@@ -43,7 +43,7 @@ export default function Navbar() {
 
     return (
         <div className={`sticky top-0 z-40 bg-white w-full border-b-2 border-gray-200 ${scrolled ? 'shadow-md' : ''}`}>
-            <div className='max-w-7xl mx-auto flex justify-between items-center gap-4 py-3 px-4 sm:px-6 lg:px-8 relative'>
+            <div className='max-w-6xl mx-auto flex justify-between items-center gap-4 py-3 px-4 sm:px-6 lg:px-8 relative'>
                 {/* Logo */}
                 <div className="flex items-center gap-2 cursor-pointer">
                     <img className='w-8' src="/images/Logo.svg" alt="Logo" />

@@ -5,8 +5,6 @@
 
 const SENSITIVE_FIELDS = [
   'password',
-  'token',
-  'authorization',
   'secret',
   'apiKey',
   'api_key',

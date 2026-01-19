@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 export default function ProfileCard() {
-  const { user, updateUserProfile, isLoading: authLoading } = useAuth();
+  // No auth - use dummy user data
+  const user = { name: 'Demo User', email: 'demo@financy.com', mobile: '+91 9876543210' };
   const [editing, setEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [profile, setProfile] = useState({
@@ -19,12 +19,12 @@ export default function ProfileCard() {
       const newProfile = {
         name: user.name || '',
         email: user.email || '',
-        mobile: user.mobile || '', // This might need to be added to backend model
+        mobile: user.mobile || '',
       };
       setProfile(newProfile);
       setFormData(newProfile);
     }
-  }, [user]);
+  }, []);
   
   const handleEdit = () => {
     setEditing(true);
@@ -38,9 +38,11 @@ export default function ProfileCard() {
   const handleSave = async () => {
     try {
       setIsUpdating(true);
-      await updateUserProfile(formData);
+      // No auth - just update local state
+      console.log('Profile update (no auth):', formData);
       setProfile({...formData});
       setEditing(false);
+      alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
@@ -60,12 +62,7 @@ export default function ProfileCard() {
     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 overflow-hidden">
       <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
       
-      {authLoading ? (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      ) : (
-        <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
           <div className="flex flex-col items-center">
             <div className="w-28 h-28 rounded-full overflow-hidden mb-2">
               <img 
@@ -177,7 +174,6 @@ export default function ProfileCard() {
             )}
           </div>
         </div>
-      )}
     </div>
   );
 }

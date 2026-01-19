@@ -7,7 +7,6 @@ import {
 import ExitPositionModal from '../components/position/ExitPositionModal';
 import { positionManager } from '../Data/Data';
 import { TradingService } from '../services/tradingService';
-import { useAuth } from '../context/AuthContext';
 
 export default function PositionPage() {
   const [activeTab, setActiveTab] = useState('all');
@@ -15,27 +14,23 @@ export default function PositionPage() {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [positions, setPositions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user } = useAuth();
+  // No auth check - publicly accessible
+  const isAuthenticated = true;
+  const user = { id: 'guest-user' };
   
   // Load positions data
   useEffect(() => {
-    if (isAuthenticated && user) {
-      loadPositions();
-    } else {
-      // Clear positions if user is not authenticated
-      setPositions([]);
-      setIsLoading(false);
-    }
+    loadPositions();
     
     // Subscribe to data refresh events
     const unsubscribe = TradingService.subscribeToDataRefresh(() => {
-      if (isAuthenticated && user) {
+      if (isAuthenticated) {
         loadPositions();
       }
     });
     
     return unsubscribe;
-  }, [isAuthenticated, user]);
+  }, []);
 
   const loadPositions = async () => {
     try {
@@ -113,7 +108,7 @@ export default function PositionPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
           <span className="ml-3 text-gray-600">Loading positions...</span>
@@ -124,7 +119,7 @@ export default function PositionPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Please log in to view your positions</p>
@@ -141,7 +136,7 @@ export default function PositionPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
       {/* Summary Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200">

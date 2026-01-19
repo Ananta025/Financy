@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import OpenAccount from "../OpenAccount"
-import axios from 'axios'
-import httpStatus from "http-status"
 import { ChatbotWidget } from '../common'
 
 export default function Signup() {
@@ -10,132 +8,43 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
-  // Replace simple error strings with error objects to track field-specific errors
-  const [loginErrors, setLoginErrors] = useState({});
-  const [signupErrors, setSignupErrors] = useState({});
+  const [loginError, setLoginError] = useState("");
+  const [signupError, setSignupError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-  },[])
+    // Clear any existing tokens on mount
+    localStorage.removeItem("authToken");
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoginErrors({}); // Clear previous errors
+    setLoginError("");
     setIsLoading(true);
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signin`,{
-        email,
-        password
-      })
-      if(response.status === httpStatus.OK){
-        console.log("User logged in successfully");
-        
-        // Get returnTo parameter if it exists
-        const searchParams = new URLSearchParams(window.location.search);
-        const returnTo = searchParams.get('returnTo');
-        
-        // Get token and userId from response
-        const token = response.data.token;
-        const userId = response.data.userId;
-        
-        // Redirect with token as URL parameters
-        if (returnTo) {
-          // If returnTo URL exists, redirect there with token and userId
-          window.location.href = `${returnTo}?token=${token}&userId=${userId}`;
-        } else {
-          // Otherwise go to dashboard login redirect
-          window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
-        }
-      }
-    } catch(err) {
-      console.error("Login error:", err.response?.data || err.message);
-      
-      // Clear form fields on unsuccessful login
-      setEmail("");
-      setPassword("");
-      
-      // Check specifically for invalid credentials error
-      if (err.response?.status === 401 || 
-          err.response?.data?.message?.toLowerCase().includes('invalid credentials') ||
-          err.response?.data?.message?.toLowerCase().includes('incorrect password')) {
-        setLoginErrors({ general: "Invalid email or password. Please try again." });
-      }
-      // Updated: Use error.path instead of error.param to match backend response
-      else if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const fieldErrors = {};
-        err.response.data.errors.forEach(error => {
-          fieldErrors[error.path] = error.msg; // Changed from error.param to error.path
-        });
-        setLoginErrors(fieldErrors);
-      } else {
-        // General error
-        setLoginErrors({ general: err.response?.data?.message || "Login failed. Please try again." });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    
+    // No auth logic - just log to console
+    console.log('Login clicked:', { email, password });
+    
+    // Navigate to dashboard without auth
+    const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:5174';
+    window.location.href = DASHBOARD_URL;
   }
   
   const handleSignup = async (e) => {
     e.preventDefault();
-    setSignupErrors({}); // Clear previous errors
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/signup`,{
-        name,
-        email,
-        password
-      })
-      if(response.status === httpStatus.CREATED){
-        console.log("User created successfully");
-        
-        // Get returnTo parameter if it exists
-        const searchParams = new URLSearchParams(window.location.search);
-        const returnTo = searchParams.get('returnTo');
-        
-        // Get token and userId from response
-        const token = response.data.token;
-        const userId = response.data.userId;
-        
-        // Redirect with token as URL parameters
-        if (returnTo) {
-          // If returnTo URL exists, redirect there with token and userId
-          window.location.href = `${returnTo}?token=${token}&userId=${userId}`;
-        } else {
-          // Otherwise go to dashboard login redirect
-          window.location.href = `${import.meta.env.VITE_DASHBOARD_URL}/login-redirect?token=${token}&userId=${userId}`;
-        }
-      }
-    } catch(err) {
-      console.error("Signup error:", err.response?.data || err.message);
-      
-      // Clear form fields on unsuccessful signup
-      setName("");
-      setEmail("");
-      setPassword("");
-      
-      // Updated: Use error.path instead of error.param to match backend response
-      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        const fieldErrors = {};
-        err.response.data.errors.forEach(error => {
-          fieldErrors[error.path] = error.msg; // Changed from error.param to error.path
-        });
-        setSignupErrors(fieldErrors);
-      } else {
-        // General error
-        setSignupErrors({ general: err.response?.data?.message || "Signup failed. Please try again." });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    
+    // No auth logic - just log to console
+    console.log('Signup clicked:', { name, email, password });
+    
+    // Navigate to dashboard without auth
+    const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:5174';
+    window.location.href = DASHBOARD_URL;
   }
 
   return (
     <div id="auth-container" className='container'>
-      <div className="row text-center py-3">
-        <h2 className="fw-bold">Open a free demat and trading account online</h2>
+      <div className="row text-center py-2">
+        <h2 className="fw-medium pb-2">Open a free demat and trading account online</h2>
         <p className='text-muted'>Start investing brokerage free and join a community of 1.5+ crore investors and traders</p>
       </div>
       
@@ -166,24 +75,22 @@ export default function Signup() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       type="email" 
-                      className={`form-control ${loginErrors.email ? 'is-invalid' : ''}`}
+                      className="form-control"
                       placeholder="Email Address" 
                       required 
                     />
-                    {loginErrors.email && <div className="invalid-feedback">{loginErrors.email}</div>}
                   </div>
                   <div className="mb-4">
                     <input
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       type="password" 
-                      className={`form-control ${loginErrors.password ? 'is-invalid' : ''}`}
+                      className="form-control"
                       placeholder="Password" 
                       required 
                     />
-                    {loginErrors.password && <div className="invalid-feedback">{loginErrors.password}</div>}
                   </div>
-                  {loginErrors.general && <div className="alert alert-danger">{loginErrors.general}</div>}
+                  {loginError && <div className="alert alert-danger">{loginError}</div>}
                   <div className="mb-3 text-end">
                     <a href="#" className="text-decoration-none fs-6">Forgot Password?</a>
                   </div>
@@ -205,35 +112,32 @@ export default function Signup() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       type="text" 
-                      className={`form-control ${signupErrors.name ? 'is-invalid' : ''}`}
+                      className="form-control"
                       placeholder="Full Name" 
                       required 
                     />
-                    {signupErrors.name && <div className="invalid-feedback">{signupErrors.name}</div>}
                   </div>
                   <div className="mb-4">
                     <input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       type="email" 
-                      className={`form-control ${signupErrors.email ? 'is-invalid' : ''}`}
+                      className="form-control"
                       placeholder="Email Address" 
                       required 
                     />
-                    {signupErrors.email && <div className="invalid-feedback">{signupErrors.email}</div>}
                   </div>
                   <div className="mb-4">
                     <input
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       type="password" 
-                      className={`form-control ${signupErrors.password ? 'is-invalid' : ''}`}
+                      className="form-control"
                       placeholder="Create Password" 
                       required 
                     />
-                    {signupErrors.password && <div className="invalid-feedback">{signupErrors.password}</div>}
                   </div>
-                  {signupErrors.general && <div className="alert alert-danger">{signupErrors.general}</div>}
+                  {signupError && <div className="alert alert-danger">{signupError}</div>}
                   <div className="mb-3 form-check d-flex flex-wrap align-items-center">
                     <input type="checkbox" className="form-check-input me-2" id="termsCheck" required />
                     <label className="form-check-label fs-6" htmlFor="termsCheck">I agree to the Terms & Conditions</label>
@@ -253,7 +157,7 @@ export default function Signup() {
       </div>
 
       <div className="row text-center py-4 mt-2">
-        <h2 className="fw-bold">Investment options with Financy demat account</h2>
+        <h2 className="fw-medium">Investment options with Financy demat account</h2>
       </div>
       
       <div id="promotion" className="row py-4">
@@ -296,14 +200,14 @@ export default function Signup() {
 
       <div className="row">
         <div className="row text-center py-4">
-          <h2 className="fw-bold">Steps to open a demat account with Financy</h2>
+          <h2 className="fw-medium">Steps to open a demat account with Financy</h2>
         </div>
         <div className="row">
           <div className="col-md-6 py-4 text-center">
             <img src="\media\images\steps-acop.svg" alt="Steps" className="img-fluid" />
           </div>
           <div className="col-md-6 py-4 d-flex justify-content-center align-items-center">
-            <ol className='fw-bold'>
+            <ol className='fw-medium'>
               <li className="pb-3 mb-3 border-bottom" style={{maxWidth: "300px"}}>Enter the requested details</li>
               <li className="pb-3 mb-3 border-bottom" style={{maxWidth: "300px"}}>Complete e-sign & verification</li>
               <li style={{maxWidth: "300px"}}>Start investing!</li>
@@ -314,7 +218,7 @@ export default function Signup() {
 
       <div className="row">
         <div className="row text-center py-4">
-          <h2 className="fw-bold">Frequently Asked Questions</h2>
+          <h2 className="fw-medium">Frequently Asked Questions</h2>
         </div>
         <div className="accordion" id="faqAccordion">
           <div className="accordion-item">

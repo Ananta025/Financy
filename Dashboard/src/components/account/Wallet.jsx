@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 export default function Wallet() {
-  const { user } = useAuth();
+  // No auth - use dummy user
+  const user = { id: 'demo-user', name: 'Demo User' };
   const [walletData, setWalletData] = useState(null);
   const [isAddingFunds, setIsAddingFunds] = useState(false);
   const [addFundAmount, setAddFundAmount] = useState('');
@@ -22,7 +22,7 @@ export default function Wallet() {
       setWalletData(initialWalletData);
       localStorage.setItem(`walletData_${user?.id}`, JSON.stringify(initialWalletData));
     }
-  }, [user?.id]);
+  }, []);
 
   const handleAddFunds = () => {
     setIsAddingFunds(true);

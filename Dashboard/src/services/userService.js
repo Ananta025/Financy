@@ -1,7 +1,6 @@
 import axios from 'axios';
-import authService from './authService';
 
-const API_BASE_URL = 'https://financy-6bzf.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 /**
  * Service for handling user-related API operations
@@ -14,18 +13,8 @@ const userService = {
    */
   getUserProfile: async (userId) => {
     try {
-      const token = authService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const response = await axios.get(
-        `${API_BASE_URL}/users/profile/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        `${API_BASE_URL}/users/profile/${userId}`
       );
 
       return response.data;
@@ -43,17 +32,11 @@ const userService = {
    */
   updateUserProfile: async (userId, profileData) => {
     try {
-      const token = authService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const response = await axios.put(
         `${API_BASE_URL}/users/profile/${userId}`,
         profileData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }
@@ -67,16 +50,13 @@ const userService = {
   },
 
   /**
-   * Get current user's profile using stored userId
+   * Get current user's profile using hardcoded userId
    * @returns {Promise<object>} Current user's profile data
    */
   getCurrentUserProfile: async () => {
     try {
-      const userId = authService.getUserId();
-      if (!userId) {
-        throw new Error('No user ID found');
-      }
-
+      // No auth - use default user ID
+      const userId = '000000000000000000000001';
       return await userService.getUserProfile(userId);
     } catch (error) {
       console.error('Error fetching current user profile:', error);
@@ -91,11 +71,8 @@ const userService = {
    */
   updateCurrentUserProfile: async (profileData) => {
     try {
-      const userId = authService.getUserId();
-      if (!userId) {
-        throw new Error('No user ID found');
-      }
-
+      // No auth - use default user ID
+      const userId = '000000000000000000000001';
       return await userService.updateUserProfile(userId, profileData);
     } catch (error) {
       console.error('Error updating current user profile:', error);

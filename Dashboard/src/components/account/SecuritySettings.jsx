@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 export default function SecuritySettings() {
-  const { logout } = useAuth();
+  // No auth - logout just logs to console
+  const logout = () => console.log('Logout clicked (no auth)');
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   const handleChangePassword = () => {
@@ -23,7 +23,7 @@ export default function SecuritySettings() {
     if (window.confirm('Are you sure you want to logout?')) {
       try {
         await logout();
-        // User will be redirected automatically by AuthContext
+        alert('Logged out successfully!');
       } catch (error) {
         console.error('Logout failed:', error);
         alert('Failed to logout. Please try again.');

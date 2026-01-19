@@ -1,21 +1,6 @@
 import rateLimit from 'express-rate-limit';
 
-/**
- * Strict rate limiter for authentication endpoints
- * Prevents brute force attacks on login/signup
- */
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many authentication attempts. Please try again after 15 minutes.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  // Skip successful requests from counting
-  skipSuccessfulRequests: true
-});
+// Auth limiter removed - no longer needed
 
 /**
  * General API rate limiter
@@ -48,7 +33,6 @@ export const orderLimiter = rateLimit({
 });
 
 export default {
-  authLimiter,
   apiLimiter,
   orderLimiter
 };

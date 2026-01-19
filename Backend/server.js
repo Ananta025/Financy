@@ -87,18 +87,13 @@ if (!mongo_url) {
   process.exit(1);
 }
 
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'secret') {
-  console.error('FATAL ERROR: JWT_SECRET is not defined or using default value');
-  process.exit(1);
-}
-
 mongoose.connect(mongo_url, {
   // SECURITY: Connection options
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 }).then(() => {
-    console.log('✅ Connected to MongoDB');
+    console.log('Connected to MongoDB');
 }).catch((error) => {
     console.error('❌ MongoDB connection error:', error.message);
     process.exit(1);

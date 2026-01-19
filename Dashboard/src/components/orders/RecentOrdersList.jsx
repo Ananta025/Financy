@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTrading } from '../../context/tradingHooks.js';
-import { useAuth } from '../../context/AuthContext';
 import { positionManager } from '../../Data/Data';
 import { TradingService } from '../../services/tradingService';
 
 const RecentOrdersList = ({ refreshTrigger }) => {
   const { recentOrders: rawOrders, loading, errors, refreshAllData } = useTrading();
-  const { isAuthenticated } = useAuth();
+  // No auth check - publicly accessible
+  const isAuthenticated = true;
   const [localOrders, setLocalOrders] = useState([]);
   
   const isLoading = loading?.orders || false;

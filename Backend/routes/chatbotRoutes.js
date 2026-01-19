@@ -1,6 +1,5 @@
 import express from 'express';
 import { GoogleGenAI } from "@google/genai";
-import auth from '../middleware/auth.js';
 import httpStatus from 'http-status';
 
 const router = express.Router();
@@ -28,12 +27,12 @@ const checkRateLimit = (userId) => {
 
 /**
  * POST /chatbot/message
- * Send message to AI chatbot (authenticated)
+ * Send message to AI chatbot (no auth required)
  */
-router.post('/message', auth, async (req, res) => {
+router.post('/message', async (req, res) => {
   try {
     const { message } = req.body;
-    const userId = req.user.userId;
+    const userId = 'anonymous'; // No auth - use anonymous
 
     // Validate input
     if (!message || typeof message !== 'string') {

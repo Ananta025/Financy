@@ -1,6 +1,6 @@
 .nav-link{
     margin-left: 1.5rem;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 400;
     opacity: 0.7;
 }
@@ -15,9 +15,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 10rem;
+    padding: 0.25rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
+}
+.navbar.position-sticky {
+    z-index: 1030;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 100;
 }
 #nav-item:hover{
     opacity: 1;
@@ -27,9 +31,9 @@
 
 /* Auth section done */
 #auth-container{
-    padding: 5rem 8rem;
+    padding: 5rem 1.5rem;
     font-size: 1.25rem;
-    max-width: 1600px;
+    max-width: 1152px;
     margin: 0 auto;
 }
 
@@ -54,7 +58,7 @@
 /* New styles for large screens */
 @media (min-width: 1440px) {
     #auth-container {
-        padding: 6rem 10rem;
+        padding: 6rem 2rem;
     }
     
     .auth-form-container {
@@ -72,7 +76,7 @@
 
 @media (max-width: 1200px) {
     #auth-container {
-        padding: 4rem 6rem;
+        padding: 4rem 1.5rem;
     }
 }
 
@@ -127,7 +131,9 @@
 /* About section styles */
 
 #about-hero{
-    padding: 0 10rem;
+    padding: 0 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 #about-hero-info{
     padding: 5rem 0;
@@ -147,7 +153,9 @@
 /* Product section styles */
 
 #product-hero{
-    padding: 5rem 12rem;
+    padding: 5rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 #add-link{
     text-decoration: none;
@@ -160,7 +168,9 @@
 }
 
 #left-section{
-    padding: 0 6rem;
+    padding: 0 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 #left-section-content{
@@ -178,42 +188,46 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 6rem;
+    padding: 0 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 
 #universe{
-    padding: 5rem 10rem;
+    padding: 5rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 /* Responsive styles */
 @media (max-width: 1200px) {
     #product-hero {
-        padding: 3rem 6rem;
+        padding: 3rem 1.5rem;
     }
     #left-section, #right-section-content {
-        padding: 0 3rem;
+        padding: 0 1.5rem;
     }
     #universe {
-        padding: 3rem 5rem;
+        padding: 3rem 1.5rem;
     }
     #support-hero {
-        padding: 3rem 8rem;
+        padding: 3rem 1.5rem;
     }
     #create-ticket {
-        padding: 4rem 6rem;
+        padding: 4rem 1.5rem;
     }
 }
 
 @media (max-width: 992px) {
     #product-hero {
-        padding: 2rem 4rem;
+        padding: 2rem 1.5rem;
     }
     #left-section, #right-section-content {
-        padding: 0 2rem;
+        padding: 0 1.5rem;
     }
     #universe {
-        padding: 2rem 3rem;
+        padding: 2rem 1.5rem;
     }
     #left-section-content {
         flex-direction: column;
@@ -222,31 +236,31 @@
         flex-direction: column-reverse;
     }
     #support-hero {
-        padding: 2rem 4rem;
+        padding: 2rem 1.5rem;
     }
     #create-ticket {
-        padding: 3rem 4rem;
+        padding: 3rem 1.5rem;
     }
     #about-hero {
-        padding: 0 5rem;
+        padding: 0 1.5rem;
     }
     #pricing, #brokerage {
-        padding: 3rem 5rem;
+        padding: 3rem 1.5rem;
     }
 }
 
 @media (max-width: 768px) {
     #nav-bar {
-        padding: 0.5rem 2rem;
+        padding: 0.5rem 1rem;
     }
     #product-hero {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #left-section, #right-section-content {
         padding: 0 1rem;
     }
     #universe {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #left-section-content .col-7,
     #left-section-content .col-5,
@@ -256,23 +270,23 @@
         text-align: center;
     }
     #support-hero {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #support-hero-item {
         flex-direction: column;
         align-items: flex-start;
     }
     #create-ticket {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #about-hero {
-        padding: 0 2rem;
+        padding: 0 1rem;
     }
     #pricing, #brokerage {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #auth-container {
-        padding: 3rem 4rem;
+        padding: 3rem 1rem;
     }
 }
 
@@ -302,10 +316,14 @@
 /* Pricing section styles */
 
 #pricing{
-    padding: 4rem 8rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 #brokerage{
-    padding: 4rem 8rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 /* Enhanced Pricing section styles */
@@ -316,7 +334,9 @@
 }
 
 #pricing, #brokerage {
-    padding: 4rem 8rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
     overflow-x: hidden;
 }
 
@@ -327,7 +347,7 @@
 
 @media (max-width: 1200px) {
     #pricing, #brokerage {
-        padding: 3rem 6rem;
+        padding: 3rem 1.5rem;
     }
     
     .pricing-image {
@@ -337,7 +357,7 @@
 
 @media (max-width: 992px) {
     #pricing, #brokerage {
-        padding: 3rem 4rem;
+        padding: 3rem 1.5rem;
     }
     
     .pricing-image {
@@ -359,7 +379,7 @@
 
 @media (max-width: 768px) {
     #pricing, #brokerage {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     
     .pricing-image {
@@ -413,7 +433,9 @@
 /* Support section styles */
 
 #support-hero{
-    padding: 3rem 12rem;
+    padding: 3rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 #support-hero-item{
@@ -439,7 +461,9 @@
 }
 
 #create-ticket{
-    padding: 4rem 8rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 #create-ticket a {
@@ -458,10 +482,12 @@
 /* Footer section styles */
 
 #footer{
-    padding: 0 12rem;
+    padding: 0 1.5rem;
     padding-top: 2.5rem;
     background-color: #f9f9f9;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
+    max-width: 1152px;
+    margin: 0 auto;
 }
 #footer-social{
     display: flex;
@@ -503,36 +529,36 @@
 /* Enhanced responsive styles */
 @media (max-width: 1400px) {
     #footer {
-        padding: 0 8rem;
+        padding: 0 1.5rem;
         padding-top: 2.5rem;
     }
     #create-ticket {
-        padding: 4rem 6rem;
+        padding: 4rem 1.5rem;
     }
     #support-hero {
-        padding: 3rem 8rem;
+        padding: 3rem 1.5rem;
     }
 }
 
 @media (max-width: 1200px) {
     #footer {
-        padding: 0 5rem;
+        padding: 0 1.5rem;
         padding-top: 2rem;
     }
     #footer-social-icons {
         gap: 1.8rem;
     }
     #create-ticket {
-        padding: 3rem 5rem;
+        padding: 3rem 1.5rem;
     }
     #support-hero {
-        padding: 3rem 6rem;
+        padding: 3rem 1.5rem;
     }
 }
 
 @media (max-width: 992px) {
     #footer {
-        padding: 0 3rem;
+        padding: 0 1.5rem;
         padding-top: 2rem;
     }
     #footer-link-para {
@@ -547,16 +573,16 @@
         font-size: 1.4rem;
     }
     #create-ticket {
-        padding: 2rem 3rem;
+        padding: 2rem 1.5rem;
     }
     #support-hero {
-        padding: 2rem 4rem;
+        padding: 2rem 1.5rem;
     }
 }
 
 @media (max-width: 768px) {
     #footer {
-        padding: 0 2rem;
+        padding: 0 1rem;
         padding-top: 2rem;
     }
     #footer-social-icons {
@@ -571,10 +597,10 @@
         margin-top: 0.5rem;
     }
     #create-ticket {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #support-hero {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     #create-ticket a {
         font-size: 0.9rem;
@@ -734,7 +760,9 @@
 
 /* Hero Section styles */
 #hero-section {
-    padding: 4rem 5rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 .signup-btn {
@@ -749,7 +777,9 @@
 
 /* Education section styles */
 #education-section {
-    padding: 4rem 5rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 .education-image {
@@ -769,7 +799,9 @@
 
 /* Awards section styles */
 #awards-section {
-    padding: 4rem 5rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 .awards-image {
@@ -788,7 +820,9 @@
 
 /* Home pricing section styles */
 #home-pricing-section {
-    padding: 4rem 5rem;
+    padding: 4rem 1.5rem;
+    max-width: 1152px;
+    margin: 0 auto;
 }
 
 .pricing-icon {
@@ -815,7 +849,7 @@
 /* Responsive styles for home page components */
 @media (max-width: 1200px) {
     #hero-section, #education-section, #awards-section, #home-pricing-section {
-        padding: 3rem 4rem;
+        padding: 3rem 1.5rem;
     }
     
     #hero-section h1 {
@@ -825,7 +859,7 @@
 
 @media (max-width: 992px) {
     #hero-section, #education-section, #awards-section, #home-pricing-section {
-        padding: 2.5rem 3rem;
+        padding: 2.5rem 1.5rem;
     }
     
     #hero-section h1 {
@@ -839,7 +873,7 @@
 
 @media (max-width: 768px) {
     #hero-section, #education-section, #awards-section, #home-pricing-section {
-        padding: 2rem;
+        padding: 2rem 1rem;
     }
     
     #hero-section h1 {

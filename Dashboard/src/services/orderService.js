@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { handleAuthFailure } from '../utils/authRedirect';
 
-const API_BASE_URL = 'https://financy-6bzf.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -11,31 +10,7 @@ const apiClient = axios.create({
   },
 });
 
-// Add token to requests
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Handle response errors
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token is invalid or expired
-      handleAuthFailure('Token expired or invalid (from orderService)');
-    }
-    return Promise.reject(error);
-  }
-);
+// No auth - all requests are public
 
 const orderService = {
   // Create a new order

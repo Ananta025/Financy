@@ -23,13 +23,14 @@ export default function Navbar() {
   };
 
   return (
-    <nav id="nav-bar" className="navbar navbar-expand-lg bg-white border-bottom p-2 p-md-2.5 py-2 py-md-2.75 position-sticky top-0 ">
-      <div className="container">
+    <nav className="navbar navbar-expand-lg bg-white border-bottom position-sticky top-0">
+      <div id="nav-bar" className="container-fluid">
         <div
         onClick={() => window.location.href = "/"}
         id="nav-logo" className="navbar-brand">
-            <img className="img-fluid" style={{width: "32px"}} src="/media/images/Logo copy.svg" alt="Logo" />
-            <img className="img-fluid" style={{width: "104px"}} src="/media/images/Logotype.svg" alt="Logotype" />
+            <img className="img-fluid" style={{width: "30px"}} src="/media/images/Logo copy.svg" alt="Logo" />
+            <img className="img-fluid" style={{width: "100px"}} src="/media/images/Logotype.svg" alt="Logotype" />
+            {/* <p className="fw-medium">Financy</p> */}
         </div>
         <button
           className="navbar-toggler"

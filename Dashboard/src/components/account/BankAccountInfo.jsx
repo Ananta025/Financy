@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
 export default function BankAccountInfo() {
-  const { user } = useAuth();
+  // Mock user data - no auth
+  const user = { name: 'Guest User' };
   const [isAddingAccount, setIsAddingAccount] = useState(false);
   const [bankAccount, setBankAccount] = useState(null);
   
@@ -19,7 +19,7 @@ export default function BankAccountInfo() {
     if (savedBankAccount) {
       setBankAccount(JSON.parse(savedBankAccount));
     }
-  }, [user?.id]);
+  }, []);
 
   // Update account holder name when user data changes
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function BankAccountInfo() {
         accountHolder: user.name
       }));
     }
-  }, [user?.name]);
+  }, []);
   
   const handleChange = (e) => {
     setFormData({

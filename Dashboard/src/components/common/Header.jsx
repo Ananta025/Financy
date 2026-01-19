@@ -1,10 +1,9 @@
-import { useAuth } from '../../context/AuthContext';
-
 export default function Header() {
-  const { logout } = useAuth();
-  
   const handleLogout = () => {
-    logout();
+    // No auth - just navigate to frontend
+    console.log('Logout clicked');
+    const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'http://localhost:5173';
+    window.location.href = `${FRONTEND_URL}/login`;
   };
   
   return (
